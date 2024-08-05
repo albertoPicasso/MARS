@@ -1,0 +1,311 @@
+/* Estilos generales */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: #e5e5e5;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #666666; /* Color de fondo predeterminado */
+    margin: 0;
+    padding: 0;
+    position: relative; /* Asegúrate de que el cuerpo tenga un posicionamiento relativo para el panel */
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    height: 80%;
+    max-width: 1200px;
+    max-height: 800px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd;
+    transition: background-color 0.3s, border-color 0.3s;
+    overflow: hidden;
+    position: relative; /* Asegúrate de que el contenedor tenga un posicionamiento relativo para el panel */
+}
+
+#chat {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    background: #f9f9f9;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.message {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 8px;
+    border-bottom: 1px solid #ccc; /* Línea gris en la parte inferior */
+    background: rgba(255, 255, 255, 0.8); /* Fondo blanco semi-transparente */
+    line-height: 1.5;
+}
+.user-message {
+    background-color: rgba(0, 123, 255, 0.8); /* Fondo azul semi-transparente */
+    color: #fff;
+    text-align: right;
+}
+.response-message {
+    background-color: rgba(229, 229, 229, 0.8); /* Fondo gris claro semi-transparente */
+    color: #333;
+}
+
+#input-container {
+    display: flex;
+    flex-shrink: 0;
+    border-top: 1px solid #ddd;
+    padding: 10px;
+    background: #ffffff;
+}
+
+#input-message {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+#send-button {
+    padding: 10px 20px;
+    border: none;
+    background: #007bff;
+    color: #fff;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+#send-button:hover {
+    background: #0056b3;
+}
+
+#toggle-dark-mode {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    margin-top: 10px;
+    transition: background-color 0.3s ease;
+}
+
+#toggle-dark-mode:hover {
+    background-color: #0056b3;
+}
+
+/* Panel de Control */
+#control-panel {
+    position: fixed;
+    top: 0;
+    left: -250px; /* Panel oculto por defecto */
+    width: 250px;
+    height: 100%;
+    background-color: #333;
+    color: white;
+    transition: left 0.3s ease;
+    padding: 20px;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+    z-index: 1000; /* Asegúrate de que el panel esté por encima de otros elementos */
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Centrar verticalmente los botones */
+    align-items: center; /* Centrar horizontalmente los botones */
+}
+
+.slider-container {
+    width: 100%;
+    margin-bottom: 20px;
+}
+
+#dbSlider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 8px;
+    border-radius: 5px;
+    background: #ddd;
+    outline: none;
+    opacity: 0.7;
+    transition: opacity .15s ease-in-out;
+}
+
+#dbSlider:hover {
+    opacity: 1;
+}
+
+#dbSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#dbSlider::-webkit-slider-thumb:hover {
+    background: #0056b3;
+}
+
+#dbSlider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #007bff;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#dbSlider::-moz-range-thumb:hover {
+    background: #0056b3;
+}
+
+#slider-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+#slider-labels span {
+    color: #ddd;
+}
+
+/* Estilos para los botones del panel de control en modo claro */
+.control-button {
+    display: block;
+    width: 80%;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #007bff; /* Azul en modo claro */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.control-button:hover {
+    background-color: #0056b3; /* Azul oscuro en modo claro */
+}
+
+/* Estilos para los botones del panel de control en modo oscuro */
+.dark-mode .control-button {
+    background-color: #c92a2a; /* Rojo en modo oscuro */
+}
+
+.dark-mode .control-button:hover {
+    background-color: #a52727; /* Rojo oscuro en modo oscuro */
+}
+
+/* Botón de Despliegue del Panel */
+#panel-toggle {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 20px;
+    z-index: 1001; /* Asegúrate de que el botón esté por encima del panel */
+    transition: background-color 0.3s ease;
+}
+
+#panel-toggle:hover {
+    background-color: #0056b3;
+}
+
+/* Estilos para el modo oscuro */
+.dark-mode body {
+    background-color: #181818;
+    color: #e5e5e5;
+}
+
+.dark-mode .container {
+    background: #282c34;
+    border-color: #444;
+}
+
+.dark-mode #chat {
+    background: #1e1e1e;
+    border-color: #333;
+}
+
+.dark-mode .user-message {
+    background-color: rgba(188, 39, 50, 0.8); /* Fondo granate semi-transparente */
+    color: #fff;
+}
+
+.dark-mode .response-message {
+    background-color: rgba(46, 46, 46, 0.8); /* Fondo gris oscuro semi-transparente */
+    color: #e5e5e5;
+}
+
+.dark-mode #input-container {
+    background: #2e2e2e;
+    border-top: 1px solid #444;
+}
+
+.dark-mode #input-message {
+    border: 1px solid #555;
+    background: #1e1e1e;
+    color: #e5e5e5;
+}
+
+.dark-mode #send-button {
+    background: #c92a2a; /* Granate en lugar de azul */
+    color: #fff;
+}
+
+.dark-mode #send-button:hover {
+    background: #a52727; /* Granate oscuro en lugar de azul oscuro */
+}
+
+.dark-mode #toggle-dark-mode {
+    background-color: #c92a2a; /* Granate en lugar de azul */
+}
+
+.dark-mode #toggle-dark-mode:hover {
+    background-color: #a52727; /* Granate oscuro en lugar de azul oscuro */
+}
+
+/* Estilos específicos para el slider y el botón de despliegue en modo oscuro */
+.dark-mode #dbSlider {
+    background: #555;
+}
+
+.dark-mode #dbSlider::-webkit-slider-thumb {
+    background: #c92a2a;
+}
+
+.dark-mode #dbSlider::-moz-range-thumb {
+    background: #c92a2a;
+}
+
+.dark-mode #panel-toggle {
+    background-color: #c92a2a;
+}
+
+.dark-mode #panel-toggle:hover {
+    background-color: #a52727;
+}

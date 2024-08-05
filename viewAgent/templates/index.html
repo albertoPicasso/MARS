@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>chatcretaria</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div id="control-panel">
+            <div class="slider-container">
+                <input type="range" id="dbSlider" min="1" max="3" value="1" step="1">
+                <div id="slider-labels">
+                    <span>db1</span>
+                    <span>db2</span>
+                    <span>db3</span>
+                </div>
+            </div>
+            <p>Seleccionado: <span id="selectedValue">db1</span></p>
+
+            <button class="control-button">Create new DB1</button>
+            <button class="control-button">Create new DB2</button>
+            <button class="control-button">Create new DB3</button>
+        </div>
+        <div id="panel-toggle">
+            <span>&#9776;</span> <!-- Unicode para el icono de la flecha -->
+        </div>
+        <button id="toggle-dark-mode">Toggle Dark Mode</button>
+        <div id="chat">
+            <!-- Messages will be displayed here -->
+        </div>
+        <div id="input-container">
+            <input type="text" id="input-message" placeholder="Type a message..." />
+            <button id="send-button">Send</button>
+        </div>
+    </div>
+
+    <!-- Incluye los archivos JavaScript -->
+    <script src="{{ url_for('static', filename='js/sendMessage.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/darkMode.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/panelControl.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/slider.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chatChager.js') }}"></script>
+</body>
+</html>
