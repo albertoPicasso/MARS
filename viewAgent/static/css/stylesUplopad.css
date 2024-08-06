@@ -1,0 +1,67 @@
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f5f5f5;
+    margin: 0;
+}
+
+form {
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    text-align: center;
+    max-width: 500px; 
+    width: 100%;
+}
+
+.control-button {
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    padding: 10px 20px;
+    margin: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.control-button:hover {
+    background-color: #0056b3;
+}
+
+.control-button:active {
+    background-color: #004494;
+}
+
+#fileInput {
+    display: none;
+}
+
+#fileListContainer {
+    margin-top: 20px;
+    text-align: left;
+}
+
+#fileListTitle {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+#fileList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#fileList li {
+    background: #f0f0f0;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 5px 0;
+}

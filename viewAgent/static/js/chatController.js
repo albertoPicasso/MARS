@@ -19,6 +19,7 @@ function updateChat() {
 
 // Function to handle sending messages
 function sendMessage() {
+    
     const message = inputMessage.value.trim();
     if (message) {
         addMessageToChat('user-message', message);
@@ -30,7 +31,10 @@ function sendMessage() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ message }),
+            body: JSON.stringify({
+                message,
+                currentDB
+            }),
         })
         .then(response => response.json())
         .then(data => {
@@ -48,7 +52,7 @@ sendButton.addEventListener('click', sendMessage);
 
 // Event listener for the Enter key
 inputMessage.addEventListener('keypress', (event) => {
-    if (event.key === 'Enter') {
+    if (event.key === 'Enter'  && event.shiftKey) {
         event.preventDefault(); // Prevent default form submit action if inside a form
         sendMessage();
     }

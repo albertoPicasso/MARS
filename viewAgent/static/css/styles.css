@@ -11,10 +11,10 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: #666666; /* Color de fondo predeterminado */
+    background-color: #979797; 
     margin: 0;
     padding: 0;
-    position: relative; /* Asegúrate de que el cuerpo tenga un posicionamiento relativo para el panel */
+    position: relative; 
 }
 
 .container {
@@ -30,7 +30,7 @@ body {
     border: 1px solid #ddd;
     transition: background-color 0.3s, border-color 0.3s;
     overflow: hidden;
-    position: relative; /* Asegúrate de que el contenedor tenga un posicionamiento relativo para el panel */
+    position: relative; 
 }
 
 #chat {
@@ -47,17 +47,17 @@ body {
     margin: 10px 0;
     padding: 10px;
     border-radius: 8px;
-    border-bottom: 1px solid #ccc; /* Línea gris en la parte inferior */
-    background: rgba(255, 255, 255, 0.8); /* Fondo blanco semi-transparente */
+    border-bottom: 1px solid #ccc; 
+    background: rgba(255, 255, 255, 0.8); 
     line-height: 1.5;
 }
 .user-message {
-    background-color: rgba(0, 123, 255, 0.8); /* Fondo azul semi-transparente */
+    background-color: rgba(0, 123, 255, 0.8); 
     color: #fff;
     text-align: right;
 }
 .response-message {
-    background-color: rgba(229, 229, 229, 0.8); /* Fondo gris claro semi-transparente */
+    background-color: rgba(229, 229, 229, 0.8); 
     color: #333;
 }
 
@@ -103,6 +103,10 @@ body {
     font-size: 16px;
     margin-top: 10px;
     transition: background-color 0.3s ease;
+
+    margin-left: auto;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 #toggle-dark-mode:hover {
@@ -309,3 +313,4 @@ body {
 .dark-mode #panel-toggle:hover {
     background-color: #a52727;
 }
+

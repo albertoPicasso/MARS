@@ -1,5 +1,5 @@
 
-Este trabajo está bajo una [Licencia Creative Commons Atribución-NoComercial 4.0 Internacional](http://creativecommons.org/licenses/by-nc/4.0/).
+[Licencia Creative Commons Atribución-NoComercial 4.0 Internacional](http://creativecommons.org/licenses/by-nc/4.0/).
 
 Creative Commons Attribution-NonCommercial 4.0 International Public License
 

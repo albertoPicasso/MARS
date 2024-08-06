@@ -1,0 +1,26 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subir Archivos</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesUplopad.css') }}">
+    <script src="{{ url_for('static', filename='js/uploadFile.js') }}" defer></script>
+</head>
+<body>
+    <form id="uploadForm" action="{{ url_for('upload') }}" method="post" enctype="multipart/form-data">
+        <input type="file" id="fileInput" name="file" multiple>
+        <button type="button" class="control-button" onclick="openFileDialog()">Seleccionar Archivos</button>
+        <button type="submit" class="control-button">Subir Archivos</button>
+        
+        <!-- Contenedor para la lista de archivos seleccionados -->
+        <div id="fileListContainer">
+            <p id="fileListTitle">Archivos seleccionados:</p>
+            <ul id="fileList"></ul>
+        </div>
+    </form>
+</body>
+</html>
+
+
