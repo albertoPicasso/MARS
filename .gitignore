@@ -1,1 +1,5 @@
 database/
+viewAgent/uploads
+controlAgent/users.db
+controlAgent/__pycache__
+controlAgent/databases
