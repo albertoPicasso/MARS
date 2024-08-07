@@ -1,15 +1,15 @@
 import sqlite3
 import os 
 import uuid
+import bcrypt
 
 class DatabaseManager:
     
     def __init__(self): 
         self.DB_file = "controlAgent/users.db"
-        self.initialize_database()
         self.dict = dict()
-        self.print_all_database()
-        
+        result = self.verify_user("al", "veryDifficultPass")
+        print (result)
         
     def initialize_database(self):
         db_filename = self.DB_file
@@ -47,7 +47,6 @@ class DatabaseManager:
         os.makedirs(folder_name)
         
     def verify_user(self, username, password):
-        
         conn = sqlite3.connect(self.DB_file)
         cursor = conn.cursor()
 
@@ -55,21 +54,22 @@ class DatabaseManager:
         row = cursor.fetchone()
         
         conn.close()
-        
         if row:
             user_id, stored_password = row
-            if password == stored_password:
+            # Verifica la contraseña usando bcrypt
+            if bcrypt.checkpw(password.encode(), stored_password):
                 self.dict[username] = user_id
                 return True
         return False
-
 
     def add_user(self, username, password, data_address):
         try:
             conn = sqlite3.connect(self.DB_file)
             cursor = conn.cursor()
+            # Hashea la contraseña antes de almacenarla
+            hashed_password = bcrypt.hashpw(password.encode(), bcrypt.gensalt())
             cursor.execute("INSERT INTO users (username, password, data_address) VALUES (?, ?, ?)", 
-                        (username, password, data_address))
+                        (username, hashed_password, data_address))
             conn.commit()
             conn.close()
             return True

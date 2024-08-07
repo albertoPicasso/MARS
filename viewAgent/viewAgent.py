@@ -63,27 +63,20 @@ class ViewAgent:
 
         
     def encrypt_text(self, plain_text: str, key_string: str) -> str:
-        # Convertir la clave en un formato adecuado para AES (32 bytes para AES-256)
         key = hashlib.sha256(key_string.encode()).digest()
         
-        # Generar un IV aleatorio
         iv = os.urandom(16)
 
-        # Convertir el texto a bytes
         plain_text_bytes = plain_text.encode()
 
-        # Añadir padding al texto para que sea múltiplo del tamaño del bloque
         padder = padding.PKCS7(algorithms.AES.block_size).padder()
         padded_plain_text = padder.update(plain_text_bytes) + padder.finalize()
 
-        # Crear un objeto Cipher con la clave y el IV
         cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
         encryptor = cipher.encryptor()
 
-        # Cifrar el texto
         ciphertext = encryptor.update(padded_plain_text) + encryptor.finalize()
 
-        # Convertir el IV y el ciphertext a base64 para facilitar su envío
         ciphertext_combined = iv + ciphertext
         ciphertext_base64 = base64.b64encode(ciphertext_combined).decode('utf-8')
 
