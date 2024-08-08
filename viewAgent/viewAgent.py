@@ -1,11 +1,9 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
 import os
 import requests
-import hashlib
+from cryptoManager import CryptoManager
 import base64
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives import padding
-from cryptography.hazmat.backends import default_backend
+
 
 class ViewAgent:
     def __init__(self):
@@ -14,7 +12,7 @@ class ViewAgent:
         self.database = "aaa"
         self.setup_routes()
         self.read_config()
-        self.register_control_agent()
+        #self.register_control_agent()
         
 
 
@@ -43,6 +41,7 @@ class ViewAgent:
         self.controlAgentIP = config.get('ip', 'http://default_ip')
         self.user = config.get('user', 'default_user')
         self.passForCipher = config.get('cypherPass', 'default_cypherPass')
+        self.cipheredPass = CryptoManager.encrypt_text(self.passcode,self.passForCipher)
 
           
           
@@ -51,36 +50,17 @@ class ViewAgent:
         endpoint = "/login"
         logInPath = f"{self.controlAgentIP}{endpoint}"
         
-        self.cipheredPass = self.encrypt_text(self.passcode,self.passForCipher)
-
+        self.cipheredPass = CryptoManager.encrypt_text(self.passcode,self.passForCipher)
+        print (self.cipheredPass)
         data = {
             "user":self.user,
             "pass":self.cipheredPass,
         }
-        response = requests.post(logInPath, json=data)
+        #response = requests.post(logInPath, json=data)
         #Working here//////////////////////////////////////////////////////
         
 
         
-    def encrypt_text(self, plain_text: str, key_string: str) -> str:
-        key = hashlib.sha256(key_string.encode()).digest()
-        
-        iv = os.urandom(16)
-
-        plain_text_bytes = plain_text.encode()
-
-        padder = padding.PKCS7(algorithms.AES.block_size).padder()
-        padded_plain_text = padder.update(plain_text_bytes) + padder.finalize()
-
-        cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
-        encryptor = cipher.encryptor()
-
-        ciphertext = encryptor.update(padded_plain_text) + encryptor.finalize()
-
-        ciphertext_combined = iv + ciphertext
-        ciphertext_base64 = base64.b64encode(ciphertext_combined).decode('utf-8')
-
-        return ciphertext_base64
 
 
 
@@ -112,7 +92,49 @@ class ViewAgent:
             if file:
                 file.save(os.path.join(self.app.config['UPLOAD_FOLDER'], file.filename))
 
-        # Aquí podrías llamar a algún agente de control para crear la base de datos vectorial
+        '''
+            Send to: 
+                endpoint = "/createNewDatabase"
+                logInPath = f"{self.controlAgentIP}{endpoint}"
+                
+            Data to send: 
+                userName
+                Pass
+                DatabaseNumber
+                Documents
+        '''
+        endpoint = "/createNewDatabase"
+        URL = f"{self.controlAgentIP}{endpoint}"
+
+        contentString=""
+        elementNames = ""
+        uploadPath = os.path.join("viewAgent", "uploads")
+        
+        for file in os.listdir(uploadPath):
+            filePath = os.path.join(uploadPath, file)
+            if os.path.isfile(filePath) and file.lower().endswith('.pdf'):
+                with open(filePath, 'rb') as file:
+                    auxName = file.name.split(os.sep)
+                    name = auxName[len(auxName) -1]
+                    elementNames = elementNames + name + '#'
+                    encryptedFile = CryptoManager.encrypt_pdf(filePath, self.passForCipher)
+                    contentStringaux = encryptedFile + '\n'
+                    contentString = contentString + contentStringaux
+               
+          
+        data = {
+            "user":self.user,
+            "pass":self.cipheredPass,
+            "database": self.database,
+            "elementNames": elementNames,
+            "content" : contentString
+        }
+        
+        response = requests.post(URL, json=data)
+        
+        
+        
+        
         self.database = "aaa"
         
         return render_template('close_windows.html')

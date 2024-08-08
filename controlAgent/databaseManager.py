@@ -12,6 +12,7 @@ class DatabaseManager:
         print (result)
         self.show_database()
         
+            
     def initialize_database(self):
         db_filename = self.DB_file
         CREATE_USERS_TABLE_QUERY = """
@@ -56,6 +57,7 @@ class DatabaseManager:
             os.rmdir(folder_name)
         os.makedirs(folder_name)
         
+        
     def verify_user(self, username, password):
         conn = sqlite3.connect(self.DB_file)
         cursor = conn.cursor()
@@ -66,11 +68,11 @@ class DatabaseManager:
         conn.close()
         if row:
             user_id, stored_password = row
-            # Verifica la contraseña usando bcrypt
             if bcrypt.checkpw(password.encode(), stored_password):
                 self.dict[username] = user_id
                 return True
         return False
+
 
     def add_user(self, username, password):
         try:
@@ -88,7 +90,6 @@ class DatabaseManager:
                 cursor.execute("INSERT INTO databases (idUser, numdb, idDB) VALUES (?, ?, NULL)", 
                                (user_id, numdb))
             
-            # Confirmar los cambios
             conn.commit()
             conn.close()
             return True
@@ -96,12 +97,12 @@ class DatabaseManager:
             print(f"An error occurred while adding a user: {e}")
             return False
         
+        
     def show_database(self):
         try:
             conn = sqlite3.connect(self.DB_file)
             cursor = conn.cursor()
             
-            # Obtener todos los usuarios de la tabla users
             cursor.execute("SELECT id, username, password FROM users")
             users = cursor.fetchall()
             
@@ -110,7 +111,6 @@ class DatabaseManager:
                     user_id, username, password = user
                     print(f"User ID: {user_id}, Username: {username}, Password: {password}")
                     
-                    # Obtener las entradas correspondientes en la tabla databases
                     cursor.execute("SELECT id, idUser, numdb, idDB FROM databases WHERE idUser = ?", (user_id,))
                     databases = cursor.fetchall()
                     
