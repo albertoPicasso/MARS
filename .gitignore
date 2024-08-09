@@ -2,4 +2,5 @@ database/
 viewAgent/uploads
 controlAgent/users.db
 controlAgent/__pycache__
-controlAgent/databases
+RA&DAgent/databases
+RA&DAgent/__pycache__

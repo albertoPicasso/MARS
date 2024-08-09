@@ -1,0 +1,2 @@
+ip:http://127.0.0.1:5007
+cypherPass:fedcba0987654321fedcba0987654321

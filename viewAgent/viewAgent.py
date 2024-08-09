@@ -68,6 +68,7 @@ class ViewAgent:
     def home(self):
         return render_template('index.html')
 
+
     def send_message(self):
         user_message = request.json.get('message')
         additional_param = request.json.get('currentDB')
@@ -75,12 +76,14 @@ class ViewAgent:
         response_message = f"Echo: {user_message}, Param: {additional_param if additional_param is not None else 'None'}"
         return jsonify({'response': response_message})
 
+
     def upload_file(self):
         db_name = request.args.get('db')
         if db_name not in ['DB1', 'DB2', 'DB3']:
             return "Base de datos no válida", 400
         self.database = db_name.lower()
         return render_template('uploadFile.html')
+
 
     def upload(self):
         if 'file' not in request.files:
@@ -91,7 +94,6 @@ class ViewAgent:
                 return 'No selected file', 400
             if file:
                 file.save(os.path.join(self.app.config['UPLOAD_FOLDER'], file.filename))
-
         '''
             Send to: 
                 endpoint = "/createNewDatabase"
@@ -131,13 +133,26 @@ class ViewAgent:
         }
         
         response = requests.post(URL, json=data)
-        
-        
-        
-        
+        delete_path = os.path.join("viewAgent", "uploads")
+        self.empty_directory(delete_path)
         self.database = "aaa"
         
         return render_template('close_windows.html')
+
+
+
+    def empty_directory(self, path):
+        """Empty a directory of all its contents without deleting the directory itself."""
+        if os.path.exists(path):
+            if os.path.isdir(path):
+                for item in os.listdir(path):
+                    item_path = os.path.join(path, item)
+                    if os.path.isdir(item_path):
+                        self.empty_directory(item_path)
+                        os.rmdir(item_path)
+                    else:
+                        os.remove(item_path)
+            
 
     def run(self):
         self.app.run(port=5005, debug=True)

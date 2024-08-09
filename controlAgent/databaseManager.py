@@ -7,10 +7,7 @@ class DatabaseManager:
     def __init__(self): 
         self.DB_file = "controlAgent/users.db"
         self.dict = dict()
-        self.initialize_database()
-        result = self.verify_user("al", "veryDifficultPass")
-        print (result)
-        self.show_database()
+        self.initialize_database()    
         
             
     def initialize_database(self):
