@@ -2,14 +2,15 @@ import sqlite3
 import os 
 import bcrypt
 
+#Clase para Managear la Database
 class DatabaseManager:
-    
+    #Constructor
     def __init__(self): 
         self.DB_file = "controlAgent/users.db"
         self.dict = dict()
         self.initialize_database()    
         
-            
+    #Funcion para inicializar la database        
     def initialize_database(self):
         db_filename = self.DB_file
         CREATE_USERS_TABLE_QUERY = """
@@ -39,11 +40,11 @@ class DatabaseManager:
             conn.close()
             self.insert_users()
         
-        
+    #metodo para insertar usuarios -como ellos no tienen ni idea de usernames ni contraseñas se los pongo yo-    
     def insert_users(self):
         self.add_user('al', 'veryDifficultPass')
       
-        
+    #metodo para crear contenedores    
     def create_containers(self, folder_name):
         if os.path.exists(folder_name):
             for root, dirs, files in os.walk(folder_name, topdown=False):
@@ -54,7 +55,7 @@ class DatabaseManager:
             os.rmdir(folder_name)
         os.makedirs(folder_name)
         
-        
+    #metodo para verificar a un usuario  (por ejemplo para el usuario: "0; DROP TABLE users" sin las comillas devolveria falso c:   )
     def verify_user(self, username, password):
         conn = sqlite3.connect(self.DB_file)
         cursor = conn.cursor()
@@ -70,7 +71,7 @@ class DatabaseManager:
                 return True
         return False
 
-
+    #metodo para añadir a un usuario
     def add_user(self, username, password):
         try:
             conn = sqlite3.connect(self.DB_file)
@@ -94,7 +95,7 @@ class DatabaseManager:
             print(f"An error occurred while adding a user: {e}")
             return False
         
-        
+    #metodo para mostrar la database   
     def show_database(self):
         try:
             conn = sqlite3.connect(self.DB_file)
