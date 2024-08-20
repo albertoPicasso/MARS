@@ -2,15 +2,15 @@ import sqlite3
 import os 
 import bcrypt
 
-#Clase para Managear la Database
+#Classe pour gérer la base de données
 class DatabaseManager:
-    #Constructor
+    #Constructeur
     def __init__(self): 
         self.DB_file = "controlAgent/users.db"
         self.dict = dict()
         self.initialize_database()    
         
-    #Funcion para inicializar la database        
+    #Fonction pour initialiser la base de données   
     def initialize_database(self):
         db_filename = self.DB_file
         CREATE_USERS_TABLE_QUERY = """
@@ -40,11 +40,11 @@ class DatabaseManager:
             conn.close()
             self.insert_users()
         
-    #metodo para insertar usuarios -como ellos no tienen ni idea de usernames ni contraseñas se los pongo yo-    
+    #méthode pour insérer de nouveaux utilisateurs (comme ils ne connaissent rien aux mots de passe, je les définis en leur nom)
     def insert_users(self):
         self.add_user('al', 'veryDifficultPass')
       
-    #metodo para crear contenedores    
+    #méthode pour créer des conteneurs
     def create_containers(self, folder_name):
         if os.path.exists(folder_name):
             for root, dirs, files in os.walk(folder_name, topdown=False):
@@ -55,7 +55,7 @@ class DatabaseManager:
             os.rmdir(folder_name)
         os.makedirs(folder_name)
         
-    #metodo para verificar a un usuario  (por ejemplo para el usuario: "0; DROP TABLE users" sin las comillas devolveria falso c:   )
+    #méthode pour vérifier un utilisateur (par exemple, en utilisant le nom d'utilisateur "; DROP TABLE Users" sans virgules, il renvoie false)
     def verify_user(self, username, password):
         conn = sqlite3.connect(self.DB_file)
         cursor = conn.cursor()
@@ -71,7 +71,7 @@ class DatabaseManager:
                 return True
         return False
 
-    #metodo para añadir a un usuario
+    #méthode pour ajouter un utilisateur
     def add_user(self, username, password):
         try:
             conn = sqlite3.connect(self.DB_file)
@@ -95,7 +95,7 @@ class DatabaseManager:
             print(f"An error occurred while adding a user: {e}")
             return False
         
-    #metodo para mostrar la database   
+    #méthode pour afficher la base de données
     def show_database(self):
         try:
             conn = sqlite3.connect(self.DB_file)
