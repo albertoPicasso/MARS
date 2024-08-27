@@ -2,12 +2,12 @@ from dataclasses import dataclass, field
 import os
 
 @dataclass
-class RabConfig: 
+class RadConfig: 
     ip: str = field(default="")
     cypherPass: str = field(default="")
     
     def __post_init__(self):
-        file_path = os.path.join('controlAgent','configFiles', 'rabInfo.txt')
+        file_path = os.path.join('controlAgent','configFiles', 'radInfo.txt')
         config = dict()
         with open(file_path, 'r') as file:
             for line in file:
@@ -19,5 +19,4 @@ class RabConfig:
         self.cypherPass = config.get('cypherPass', 'default_cypherPass')
         
         
-ra = RabConfig()
-print(ra.cypherPass)
+ra = RadConfig()

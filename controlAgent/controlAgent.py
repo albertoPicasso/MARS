@@ -1,17 +1,19 @@
 from flask import Flask, request,jsonify, abort
 from databaseManager import DatabaseManager
 from cryptoManager import CryptoManager
-from configClasses.rabConfig import RabConfig
+from configClasses.radConfig import RadConfig
 import uuid
 import os 
 import requests
 
 class ControlAgent: 
     def __init__(self):
-        self.app = Flask(__name__)    
+        self.app = Flask(__name__)            
         self.setup_routes()
         self.DBusers = DatabaseManager()
-        self.rabConfig = RabConfig()
+        self.radConfig = RadConfig()
+        self.DBusers.update_databaseID(username='al', database_number=1, new_databaseID="culoAJJAJAJ")
+        self.DBusers.show_database()
         
         
     def setup_routes(self):
@@ -64,7 +66,7 @@ class ControlAgent:
             
         ##Send to db Agent to create Database
         endpoint = "/createvectordatabase"
-        URL = f"{self.rabConfig.ip}{endpoint}"
+        URL = f"{self.radConfig.ip}{endpoint}"
         contentString=""
         elementNames = ""
         uploadPath = folder_path
@@ -76,7 +78,7 @@ class ControlAgent:
                     auxName = file.name.split(os.sep)
                     name = auxName[len(auxName) -1]
                     elementNames = elementNames + name + '#'
-                    encryptedFile = CryptoManager.encrypt_pdf(filePath, self.rabConfig.cypherPass)
+                    encryptedFile = CryptoManager.encrypt_pdf(filePath, self.radConfig.cypherPass)
                     contentStringaux = encryptedFile + '\n'
                     contentString = contentString + contentStringaux
                
