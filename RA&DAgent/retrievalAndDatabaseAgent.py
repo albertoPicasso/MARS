@@ -56,6 +56,6 @@ class retrievalAndDatabaseAgent:
         
         
 if __name__ == '__main__':
-    rab = retrievalAndDatabaseAgent()
-    rab.run()
+    rad = retrievalAndDatabaseAgent()
+    rad.run()
     

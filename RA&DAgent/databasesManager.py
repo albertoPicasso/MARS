@@ -13,7 +13,7 @@ class DatabasesManager:
 
     def __init__(self): 
         self.route = os.path.join(os.getcwd(), "RA&DAgent" ,"databases")
-        print (self.route)
+        self.embedding_model = HuggingFaceEmbeddings(model_name="paraphrase-multilingual-mpnet-base-v2")
         
 
     def create_database(self, container_path:str, database_name:str):
@@ -40,8 +40,11 @@ class DatabasesManager:
         # Send documents and wait for embeddings
         self._save_embeddings(database_name=database_name, split_documents=split_documents)
         
-    
-    
+        docs = self.retrieval_augmented(database_name=database_name,query_text="Que modelos TTS (text-to-speech) se usan")
+
+        for doc in docs:
+            print(doc.page_content[:500])
+            print()
     
     def _prepare_data(self, container_path): 
         """
@@ -94,11 +97,10 @@ class DatabasesManager:
             for page_number, document in enumerate(documents, start=1): 
                 chunks = text_splitter.split_text(document.page_content) 
                 for chunk in chunks:
-                    # En lugar de diccionarios, creamos instancias de Document directamente
                     split_documents.append(
                         Document(
-                            page_content=chunk,  # El contenido de la página dividido en chunks
-                            metadata={           # Aquí agregamos los metadatos
+                            page_content=chunk,
+                            metadata={         
                                 "file": os.path.basename(path),
                                 "page_number": page_number  
                             }
@@ -112,24 +114,28 @@ class DatabasesManager:
         
         path =  os.path.join(self.route, database_name)
         vector_store = path
-        print (vector_store)
-        #Saved in 
-        embedding_model = HuggingFaceEmbeddings(model_name="paraphrase-multilingual-mpnet-base-v2")
                
         if os.path.exists(vector_store):
-            vector_store_loaded = Chroma(persist_directory=vector_store, embedding_function=embedding_model)
+            vector_store_loaded = Chroma(persist_directory=vector_store, embedding_function=self.embedding_model)
         else:
             vector_store = Chroma.from_documents(
                 documents=filter_complex_metadata(split_documents),
-                embedding=embedding_model,
+                embedding=self.embedding_model,
                 persist_directory = path
             )
+        return None
             
+    def retrieval_augmented(self, database_name: str, query_text: str, top_k: int = 5, similarity_threshold: float = 0.7):
         
-        embedding = embedding_model.embed_query("Hola mundo")   
-     
+        path = os.path.join(self.route, database_name)    
+        
+        vector_store_loaded = Chroma(persist_directory=path, embedding_function=self.embedding_model)
+        
+        retriever = vector_store_loaded.as_retriever(search_type="mmr", search_kwargs={"k": top_k})
+        
+        retrieved_docs = retriever.invoke(query_text)
+        
+        return retrieved_docs
 
-        print(embedding)
-        
         
         
