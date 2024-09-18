@@ -119,7 +119,6 @@ class DatabaseManager:
             self.db.connect()
             user = User.get(User.username == username)
             if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
-                self.dict[username] = user.id
                 return True
         except User.DoesNotExist:
             pass

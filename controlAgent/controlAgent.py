@@ -46,13 +46,16 @@ class ControlAgent:
         content = json.get('content')
         
         result = self.DBusers.verify_user(user, password)
+        ## Not auth user
         if (not result):
             abort(403, description="Invalid credentials")
             
+        ## Not al necessary fields
         if None in (user, cryptpassword, database, elementNames, content):
             missing_fields = [key for key in ['user', 'pass', 'database', 'elementNames', 'content'] if json.get(key) is None]
             return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
         
+        ## Decrypt info
         fileNames = elementNames.split('#')
         files = content.split('\n')
         

@@ -46,6 +46,7 @@ class ViewAgent:
           
           
     ##No será necesaria en el futuro, solo para las pruebas en login           
+    ##Ya no es necesario
     def register_control_agent (self):
         endpoint = "/login"
         logInPath = f"{self.controlAgentIP}{endpoint}"
@@ -58,7 +59,7 @@ class ViewAgent:
         }
         #response = requests.post(logInPath, json=data)
         #Working here//////////////////////////////////////////////////////
-        
+        #Ya no jejejeje
 
         
 
