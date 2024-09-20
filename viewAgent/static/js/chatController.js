@@ -20,6 +20,11 @@ function updateChat() {
 // Function to handle sending messages
 function sendMessage() {
     
+    /* 
+        { type: 'user-message', text: message}
+        { type: 'response',  text: message }   
+    */
+    
     const message = inputMessage.value.trim();
     if (message) {
         addMessageToChat('user-message', message);

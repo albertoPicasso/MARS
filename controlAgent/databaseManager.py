@@ -146,9 +146,11 @@ class DatabaseManager:
         self.db.connect()
         try: 
             user = User.get(User.username == username)
+            print (user.id)
             db = Database.get((Database.idUser == user.id) & (Database.numdb == database_number))
             db.idDB  = new_databaseID
             db.save()
+            self.db.close()
             return True
         except User.DoesNotExist:
             return False 

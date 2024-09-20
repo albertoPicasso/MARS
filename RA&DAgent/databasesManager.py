@@ -15,10 +15,34 @@ class DatabasesManager:
         self.route = os.path.join(os.getcwd(), "RA&DAgent" ,"databases")
         self.embedding_model = HuggingFaceEmbeddings(model_name="paraphrase-multilingual-mpnet-base-v2")
         
+        
 
     def create_database(self, container_path:str, database_name:str):
+        """
+            Creates a new database from the provided container path and saves embeddings.
+
+            This method initializes a new database by preparing data from the specified container path and saving
+            the embeddings to a directory named after the provided `database_name`. It performs several checks
+            to ensure the database is not created if the folder does not exist or if a database with the same name
+            already exists.
+
+            - The method first checks if the specified container path exists. If not, it raises a `ValueError`.
+            - It then checks if a directory with the provided database name already exists in the base route. If so,
+            it raises a `ValueError`.
+            - If the checks pass, it prepares the data by calling `_prepare_data`, which processes the documents
+            from the container path.
+            - After preparing the data, it saves the embeddings to a new directory named after `database_name` using
+            `_save_embeddings`.
+
+            Args:
+                container_path (str): The path to the directory containing the documents to be processed.
+                database_name (str): The name of the database to be created, which also determines the directory
+                                    where embeddings will be stored.
+
+            Raises:
+                ValueError: If the container path does not exist or if a database with the same name already exists.
+        """
             
-        # check params
         if (not (os.path.exists(container_path))): 
             raise ValueError("Folder does not exist")
         
@@ -28,24 +52,23 @@ class DatabasesManager:
                 
         database_path = os.path.join(self.route, database_name)
         
-        #Load documents
         split_documents = self._prepare_data(container_path)
         
-
         '''
         for doc in split_documents:
             print(f"File: {doc.metadata['file']}, Página: {doc.metadata['page_number']}, Chunk: {doc.page_content[:100]}...")
         '''
-         
-        # Send documents and wait for embeddings
+        ##Synchronous wait 
         self._save_embeddings(database_name=database_name, split_documents=split_documents)
-        
-        docs = self.retrieval_augmented(database_name=database_name,query_text="Que modelos TTS (text-to-speech) se usan")
-
+        '''
+        docs = self.retrieval_augmented(database_name=database_name,query_text="Se usa unity o unreal engine y para que? ")
+   
         for doc in docs:
-            print(doc.page_content[:500])
+            print(doc.page_content)
             print()
-    
+        '''
+          
+        
     def _prepare_data(self, container_path): 
         """
         Loads PDF documents from the specified directory, splits the content of each page into smaller chunks,
@@ -111,6 +134,24 @@ class DatabasesManager:
     
     
     def _save_embeddings(self, database_name, split_documents):
+        """
+        Saves or loads embeddings for the specified database using the provided documents.
+
+        This method manages the storage of embeddings associated with a particular database. If the
+        embeddings already exist in the specified directory, they are loaded; otherwise, new embeddings
+        are created from the provided documents and saved to the directory.
+
+        - The method checks if the directory for storing embeddings already exists.
+        - If the directory exists, it loads the embeddings from this directory using `Chroma`.
+        - If the directory does not exist, it creates a new embeddings store from the provided documents
+        using `Chroma.from_documents`, then saves it to the specified path.
+
+        Args:
+            database_name (str): The name of the database, which is used to determine the directory path
+                                for storing the embeddings.
+            split_documents (List[Document]): A list of documents to be used for creating embeddings.
+                                            The documents should be pre-processed and split as needed.
+    """
         
         path =  os.path.join(self.route, database_name)
         vector_store = path
@@ -123,9 +164,31 @@ class DatabasesManager:
                 embedding=self.embedding_model,
                 persist_directory = path
             )
-        return None
+
             
     def retrieval_augmented(self, database_name: str, query_text: str, top_k: int = 5, similarity_threshold: float = 0.7):
+        """
+        Performs retrieval-augmented search on the specified database using the provided query text.
+
+        This method retrieves documents from a database based on a query text. It uses an existing embeddings
+        store to perform the search and return relevant documents based on similarity.
+
+        - The method initializes the `Chroma` retriever with embeddings stored in the specified directory.
+        - It then creates a retriever object configured to use "mmr" (Maximum Marginal Relevance) for the search,
+        with the number of top documents to retrieve specified by `top_k`.
+        - The retriever is used to find and return documents that are relevant to the provided query text.
+
+        Args:
+            database_name (str): The name of the database to retrieve embeddings from.
+            query_text (str): The text of the query used to search for relevant documents.
+            top_k (int, optional): The number of top documents to retrieve. Defaults to 5.
+            similarity_threshold (float, optional): The minimum similarity score required for documents to be
+                                                    considered relevant. Defaults to 0.7.
+
+        Returns:
+            List[Document]: A list of retrieved documents that match the query text, ordered by relevance.
+    """
+        
         
         path = os.path.join(self.route, database_name)    
         

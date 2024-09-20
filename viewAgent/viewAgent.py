@@ -9,13 +9,13 @@ class ViewAgent:
     def __init__(self):
         self.app = Flask(__name__)
         self.configure_upload_folder()
-        self.database = "aaa"
         self.setup_routes()
-        self.read_config()
+        self.read_agents_config()
         #self.register_control_agent()
+        #Database represent a selected knowledge database. It is used to do some checks son best initial state is a invalid state to avoid unforeseen state updates till user select a database manually
+        self.database = "aaa" 
         
-
-
+    
     def configure_upload_folder(self):
         self.UPLOAD_FOLDER = 'viewAgent/uploads/'
         self.app.config['UPLOAD_FOLDER'] = self.UPLOAD_FOLDER
@@ -23,15 +23,18 @@ class ViewAgent:
             os.makedirs(self.UPLOAD_FOLDER)
 
     def setup_routes(self):
+        #Return HTML files
         self.app.add_url_rule('/', 'home', self.home)
-        self.app.add_url_rule('/send_message', 'send_message', self.send_message, methods=['POST']) #chat message
-        self.app.add_url_rule('/uploadFile', 'upload_file', self.upload_file)
+        self.app.add_url_rule('/uploadFile', 'upload_file', self.upload_file)                 
+        #Request control server
+        self.app.add_url_rule('/send_message', 'send_message', self.send_message, methods=['POST']) 
         self.app.add_url_rule('/upload', 'upload', self.upload, methods=['POST'])
         
-    def read_config(self):
+    def read_agents_config(self):
         base_dir = os.path.abspath(os.path.dirname(__file__))
         file_path = os.path.join(base_dir, 'controlAgentInfo.txt')
         config = dict()
+        
         with open(file_path, 'r') as file:
             for line in file:
                 key, value = line.strip().split(':', 1)
@@ -43,10 +46,20 @@ class ViewAgent:
         self.passForCipher = config.get('cypherPass', 'default_cypherPass')
         self.cipheredPass = CryptoManager.encrypt_text(self.passcode,self.passForCipher)
 
-          
-          
+         
+    ##HTML returns
+    def home(self):
+        return render_template('index.html')
+ 
+    def upload_file(self):
+        db_name = request.args.get('db')
+        if db_name not in ['DB1', 'DB2', 'DB3']:
+            return "Base de datos no válida", 400
+        self.database = db_name.lower()
+        return render_template('uploadFile.html')
+   
     ##No será necesaria en el futuro, solo para las pruebas en login           
-    ##Ya no es necesario
+    ##Ya no es necesario 
     def register_control_agent (self):
         endpoint = "/login"
         logInPath = f"{self.controlAgentIP}{endpoint}"
@@ -61,13 +74,7 @@ class ViewAgent:
         #Working here//////////////////////////////////////////////////////
         #Ya no jejejeje
 
-        
 
-
-
-
-    def home(self):
-        return render_template('index.html')
 
 
     def send_message(self):
@@ -78,12 +85,6 @@ class ViewAgent:
         return jsonify({'response': response_message})
 
 
-    def upload_file(self):
-        db_name = request.args.get('db')
-        if db_name not in ['DB1', 'DB2', 'DB3']:
-            return "Base de datos no válida", 400
-        self.database = db_name.lower()
-        return render_template('uploadFile.html')
 
 
     def upload(self):
@@ -138,6 +139,7 @@ class ViewAgent:
         self.empty_directory(delete_path)
         self.database = "aaa"
         
+        #Close uploader tab 
         return render_template('close_windows.html')
 
 
