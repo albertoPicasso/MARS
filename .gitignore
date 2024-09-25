@@ -4,3 +4,4 @@ controlAgent/users.db
 controlAgent/__pycache__
 RA&DAgent/databases
 RA&DAgent/__pycache__
+RA&DAgent/status_database.db

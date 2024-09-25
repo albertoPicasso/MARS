@@ -57,22 +57,6 @@ class ViewAgent:
             return "Base de datos no válida", 400
         self.database = db_name.lower()
         return render_template('uploadFile.html')
-   
-    ##No será necesaria en el futuro, solo para las pruebas en login           
-    ##Ya no es necesario 
-    def register_control_agent (self):
-        endpoint = "/login"
-        logInPath = f"{self.controlAgentIP}{endpoint}"
-        
-        self.cipheredPass = CryptoManager.encrypt_text(self.passcode,self.passForCipher)
-        print (self.cipheredPass)
-        data = {
-            "user":self.user,
-            "pass":self.cipheredPass,
-        }
-        #response = requests.post(logInPath, json=data)
-        #Working here//////////////////////////////////////////////////////
-        #Ya no jejejeje
 
 
 

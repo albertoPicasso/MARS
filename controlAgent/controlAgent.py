@@ -16,20 +16,8 @@ class ControlAgent:
         #self.DBusers.show_database()
         
     def setup_routes(self):
-        self.app.add_url_rule('/login', 'login', self.logIn, methods=['POST'])
         self.app.add_url_rule('/createNewDatabase', 'createNewDatabase', self.createNewDatabase, methods=['POST'])
             
-     
-    #Not in use RN, remainder to an old architecture        
-    def logIn(self): 
-        
-        data = request.get_json()
-        user = data.get('user')
-        cryptpassword = data.get('pass')
-        password = CryptoManager.decrypt_text(cryptpassword)
-        return jsonify({"message": "Datos recibidos con éxito"})
-    
-    
     def createNewDatabase(self):
         """
         Creates a new database in the selected RA&D agent .

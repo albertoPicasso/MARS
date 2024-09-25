@@ -17,7 +17,10 @@ class DatabasesManager:
         self.route = os.path.join(os.getcwd(), "RA&DAgent" ,"databases")
         self.embedding_model = HuggingFaceEmbeddings(model_name="paraphrase-multilingual-mpnet-base-v2")
         self.status_database = StatusDatabaseManager()
-        
+        """
+            Im having some issues deleting directories and databases
+            Delete all directories at start could be a possible solution
+        """
 
     def create_database(self, container_path:str, database_name:str):
         """
@@ -52,7 +55,6 @@ class DatabasesManager:
         if database_name in files: 
             raise ValueError("Database already exists")
                 
-        database_path = os.path.join(self.route, database_name)
         
         split_documents = self._prepare_data(container_path)
         
@@ -62,6 +64,7 @@ class DatabasesManager:
         '''
         ##Synchronous wait 
         self._save_embeddings(database_name=database_name, split_documents=split_documents)
+        
         '''
         docs = self.retrieval_augmented(database_name=database_name,query_text="Se usa unity o unreal engine y para que? ")
    
@@ -167,7 +170,7 @@ class DatabasesManager:
                 persist_directory = path
             )
             self.status_database.update_entry_status(database_id=database_name, new_status=StatusEnum.ready)
-
+            
             
     def retrieval_augmented(self, database_name: str, query_text: str, top_k: int = 5, similarity_threshold: float = 0.7):
         """
