@@ -17,7 +17,7 @@ class retrievalAndDatabaseAgent:
     
     def setup_routes(self):
         self.app.add_url_rule('/createvectordatabase', 'createvectordatabase', self.create_vector_database, methods=['POST'])
-    
+        self.app.add_url_rule('/deletevectordatabase', 'deletevectordatabase', self.delete_vector_database, methods=['POST'])
     
     def create_vector_database(self):
         """
@@ -80,9 +80,17 @@ class retrievalAndDatabaseAgent:
     
         response = make_response(jsonify({"database_id": folder_name}), 200)
         return response
-        
-        
     
+    
+    def delete_vector_database(self): 
+        json = request.get_json()
+        encrypted_database_id  = json.get ('encrypted_database_id')
+        database_id = CryptoManager.decrypt_text(encrypted_database_id)
+        self.status_database.update_entry_status(database_id=database_id, new_status=StatusEnum.deleted)
+        
+        response = make_response(jsonify({"OK": "OK"}), 200)
+            
+        return response
     
     
     

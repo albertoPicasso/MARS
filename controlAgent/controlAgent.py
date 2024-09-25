@@ -13,8 +13,7 @@ class ControlAgent:
         self.setup_routes()
         self.DBusers = DatabaseManager()
         self.radConfig = RadConfig()
-        self.DBusers.update_databaseID(username='al', database_number=1, new_databaseID="culoAJJAJAJ")
-        self.DBusers.show_database()
+        #self.DBusers.show_database()
         
     def setup_routes(self):
         self.app.add_url_rule('/login', 'login', self.logIn, methods=['POST'])
@@ -28,7 +27,6 @@ class ControlAgent:
         user = data.get('user')
         cryptpassword = data.get('pass')
         password = CryptoManager.decrypt_text(cryptpassword)
-        print (user, password)
         return jsonify({"message": "Datos recibidos con éxito"})
     
     
@@ -82,17 +80,18 @@ class ControlAgent:
         user = json.get('user')
         cryptpassword = json.get('pass')
         password = CryptoManager.decrypt_text(cryptpassword)
-        database = json.get ('database')
+        database_slot = json.get ('database')
         elementNames = json.get ('elementNames')
         content = json.get('content')
         
         result = self.DBusers.verify_user(user, password)
+        
         ## Not auth user
         if (not result):
             abort(403, description="Invalid credentials")
             
         ## Not al necessary fields
-        if None in (user, cryptpassword, database, elementNames, content):
+        if None in (user, cryptpassword, database_slot, elementNames, content):
             missing_fields = [key for key in ['user', 'pass', 'database', 'elementNames', 'content'] if json.get(key) is None]
             return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
         
@@ -104,6 +103,7 @@ class ControlAgent:
         folder_path = os.path.join("controlAgent", folder_name)
         os.makedirs(folder_path)
         
+        #Save pdfs in container 
         for i in range(len(files) - 1):
             save_path = os.path.join ("controlAgent",folder_name,fileNames[i])
             CryptoManager.decrypt_pdf(files[i], save_path)
@@ -137,9 +137,16 @@ class ControlAgent:
         
         ##Update users database to include new database 
         if response.status_code == 200:
+            #extact data from json
             data = response.json()
             database_id = data.get("database_id")
-            database_number = self.get_database_number(database)
+            
+            #if slot already have a database delete it to avoid leftovers
+            database_number = self.get_database_number(database_slot)
+            has_assigned = self.DBusers.has_assigned_db(user, database_number)
+            if (has_assigned):
+                self.delete_database(user=user, database_number=database_number)
+                
             self.DBusers.update_databaseID(username=user, database_number=database_number, new_databaseID=database_id)
             self.delete_directory(folder_path)
             response = make_response(jsonify({"Status": "ok"}), 200)
@@ -149,10 +156,19 @@ class ControlAgent:
             return response
 
 
-
-
-
-
+    def delete_database(self, user, database_number ):   
+        endpoint = "/deletevectordatabase"
+        URL = f"{self.radConfig.ip}{endpoint}"  
+        database_id = self.DBusers.get_database_id_by_user_and_numdb(user, database_number)
+        encrypted_database_id = CryptoManager.encrypt_text(database_id, self.radConfig.cypherPass)
+        
+        data = {
+            "encrypted_database_id": encrypted_database_id
+        }
+        
+        response = requests.post(URL, json=data)
+        
+        
     #Aux functions
     def delete_directory(self, path):
         if os.path.exists(path):            

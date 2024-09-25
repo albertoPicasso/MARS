@@ -12,7 +12,7 @@ class DatabaseManager:
         self.DB_file = "controlAgent/users.db"
         self.db = SqliteDatabase(self.DB_file)
         self.initialize_database()
-        self.show_database()
+        #self.show_database()
         
         
     def initialize_database(self):
@@ -83,6 +83,8 @@ class DatabaseManager:
         finally:
             self.db.close()
            
+    def entry_has_database(): 
+        pass
            
     ##Delete this func
     def create_containers(self, folder_name):
@@ -146,7 +148,6 @@ class DatabaseManager:
         self.db.connect()
         try: 
             user = User.get(User.username == username)
-            print (user.id)
             db = Database.get((Database.idUser == user.id) & (Database.numdb == database_number))
             db.idDB  = new_databaseID
             db.save()
@@ -188,8 +189,61 @@ class DatabaseManager:
             return False
         finally:
             self.db.close()
+        
+        
+    def get_user_id_by_username(username: str) -> int:
+        """
+            Get the user ID based on the given username.
+        """
+        try:
+            user = User.get(User.username == username)
+            return user.id  
+        except DoesNotExist:
+            return None
     
     
+
+    def has_assigned_db(self,username: str, numdb: int) -> bool:
+        """
+        Check if the user has a database assigned for the given numdb.
+
+        Args:
+            username (str): The username to look up.
+            numdb (int): The number of the database to check.
+
+        Returns:
+            bool: True if the database is assigned, False if not.
+                If idDB is '-1', it means no database is assigned.
+        """
+        try:
+            user = User.get(User.username == username)  
+            db_entry = Database.get(Database.idUser == user.id, Database.numdb == numdb)
+            
+            return db_entry.idDB != '-1' 
+        except DoesNotExist:
+            return False  
+
+
+    def get_database_id_by_user_and_numdb(self, username: str, numdb: int) -> str:
+        """
+        Get the idDB of a database for a specific user and numdb.
+
+        Args:
+            username (str): The username to look up.
+            numdb (int): The number of the database to search for.
+
+        Returns:
+            str: The idDB of the database if found, otherwise None if no database is assigned or entry doesn't exist.
+        """
+        try:
+            user = User.get(User.username == username)  # Find the user by username
+            db_entry = Database.get(Database.idUser == user.id, Database.numdb == numdb)
+            
+            return db_entry.idDB 
+        except DoesNotExist:
+            return None  
+        
+        
     
 class BaseModel(Model):
     class Meta:
