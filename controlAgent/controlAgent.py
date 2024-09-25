@@ -130,8 +130,9 @@ class ControlAgent:
         if response.status_code == 200:
             #extact data from json
             data = response.json()
-            database_id = data.get("database_id")
-            
+            cypher_database_id = data.get("database_id")
+            database_id = CryptoManager.decrypt_text(cypher_database_id, self.radConfig.cypherPass)
+            print(database_id)
             #if slot already have a database delete it to avoid leftovers
             database_number = self.get_database_number(database_slot)
             has_assigned = self.DBusers.has_assigned_db(user, database_number)

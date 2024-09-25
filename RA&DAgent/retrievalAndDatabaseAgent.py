@@ -79,8 +79,8 @@ class retrievalAndDatabaseAgent:
         #Create a thread to this func
         thread = threading.Thread(target=self.database_manager.create_database, args=(folder_path, folder_name))
         thread.start()
-    
-        response = make_response(jsonify({"database_id": folder_name}), 200)
+        cypher_database_name = CryptoManager.encrypt_text(folder_name)
+        response = make_response(jsonify({"database_id": cypher_database_name}), 200)
         return response
     
     
