@@ -6,6 +6,7 @@ from databasesManager import DatabasesManager
 
 import os 
 import uuid
+import threading
 
 class retrievalAndDatabaseAgent: 
     
@@ -23,18 +24,19 @@ class retrievalAndDatabaseAgent:
         """
         Creates a new vector database from the provided encrypted PDF content.
 
-        This function processes a request to create a vector database by decrypting 
-        provided content and saving it to a temporary directory. It then delegates 
-        the creation of the vector database to a database manager.
+        This function processes a request to create a vector database by:
+            1. Extracting `elementNames` and `content` from the incoming JSON request.
+            2. Validating that all required fields are present; returns a 400 error if any are missing.
+            3. Decrypting the provided encrypted PDF content and saving the resulting files to a temporary directory.
+            4. Calling `self.database_manager.create_database` to create the vector database using the saved files.
+            5. Returning a response containing the `database_id` corresponding to the newly created database.
 
         Process:
-            1. Extracts `elementNames` and `content` from the JSON request.
-            2. Validates that all required fields are present in the request.
-            3. Decrypts the provided encrypted PDF content and saves the files to a temporary folder.
-            4. Calls `self.database_manager.create_database` to create the database using 
-            the saved files in the temporary directory.
-            5. Returns a response with the generated `database_id` corresponding to the 
-            created database.
+            - Extracts `elementNames` and `content` from the JSON request.
+            - Validates the presence of required fields and handles missing fields by returning an error response.
+            - Decrypts the PDF files and saves them in a uniquely named temporary directory.
+            - Updates the status of the database entry to indicate that it is in the processing stage.
+            - Creates the vector database in a separate thread for asynchronous processing.
 
         Returns:
             Response: A JSON response indicating the status of the database creation.
@@ -49,9 +51,8 @@ class retrievalAndDatabaseAgent:
 
         Notes:
             - The temporary folder for storing decrypted files is created in the 'RA&DAgent' directory.
-            - The PDF files are decrypted using `CryptoManager.decrypt_pdf` before being processed 
-            by the database manager.
-
+            - The PDF files are decrypted using `CryptoManager.decrypt_pdf` before being processed by the database manager.
+            - A unique folder name is generated for each new database creation process to avoid conflicts.
         """
         
         json = request.get_json()
@@ -76,13 +77,35 @@ class retrievalAndDatabaseAgent:
             
         self.status_database.add_entry(database_id=folder_name, status_value=StatusEnum.processing)
         #Create a thread to this func
-        self.database_manager.create_database(folder_path, folder_name)
+        thread = threading.Thread(target=self.database_manager.create_database, args=(folder_path, folder_name))
+        thread.start()
     
         response = make_response(jsonify({"database_id": folder_name}), 200)
         return response
     
     
     def delete_vector_database(self): 
+        """
+        Deletes a vector database entry by updating its status to 'deleted'.
+
+        This function processes a request to delete a database by:
+            1. Extracting the encrypted database ID from the incoming JSON request.
+            2. Decrypting the encrypted database ID to get the actual database ID.
+            3. Updating the status of the database entry in the local database to 'deleted'.
+            4. Responding with a success message if the operation is successful.
+
+        Args:
+            None: This function extracts all necessary information from the incoming request's JSON payload.
+
+        Process:
+            1. Extracts `encrypted_database_id` from the JSON request.
+            2. Decrypts `encrypted_database_id` using `CryptoManager.decrypt_text()` to obtain the actual `database_id`.
+            3. Updates the status of the database entry in the local database to `deleted` by calling `self.status_database.update_entry_status()`.
+            4. Returns a JSON response indicating success.
+
+        Returns:
+            Response: A JSON response with a 200 OK status indicating that the database deletion was processed.
+        """
         json = request.get_json()
         encrypted_database_id  = json.get ('encrypted_database_id')
         database_id = CryptoManager.decrypt_text(encrypted_database_id)

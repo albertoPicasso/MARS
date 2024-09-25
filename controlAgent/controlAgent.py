@@ -41,14 +41,17 @@ class ControlAgent:
 
         Process:
             1. Extracts user credentials, encrypted content, and other necessary data from the request.
-            2. Verifies user credentials with the local database.
-            3. Checks if all required fields are present in the request.
+            2. Verifies user credentials using the local database.
+            3. Checks if all required fields are present in the request. If any are missing, returns a 400 error.
             4. Decrypts the provided PDF files and saves them to a temporary directory.
-            5. Encrypts the files again with selected RA&D agent key, prepares the data, and sends it 
-            to the remote system to create a new database.
-            6. Updates the local database with the new database ID if the remote creation is successful.
-            7. Cleans up the temporary directory.
-
+            5. Encrypts the files again with the selected RA&D agent's encryption key.
+            6. Prepares the encrypted data and sends it to the remote system for database creation.
+            7. If the database is successfully created remotely, extracts the database ID from the response.
+            8. Checks if the user already has a database assigned to the specified slot.
+                - If a database already exists in the slot, deletes it to avoid leftovers.
+            9. Updates the local user database with the new database ID for the specified slot.
+            10. Cleans up the temporary directory used to store decrypted files.
+    
         Returns:
             Response: A JSON response indicating the status of the database creation. 
                     - 200 OK if successful, including the new database information.
@@ -103,7 +106,7 @@ class ControlAgent:
         folder_path = os.path.join("controlAgent", folder_name)
         os.makedirs(folder_path)
         
-        #Save pdfs in container 
+        #Save pdfs in the container 
         for i in range(len(files) - 1):
             save_path = os.path.join ("controlAgent",folder_name,fileNames[i])
             CryptoManager.decrypt_pdf(files[i], save_path)
@@ -157,6 +160,17 @@ class ControlAgent:
 
 
     def delete_database(self, user, database_number ):   
+        """
+        Deletes a database from the selected RA&D agent for a specific user and database number.
+
+        Args:
+            user (str): The username of the user whose database needs to be deleted.
+            database_number (int): The number of the database slot to be deleted.
+
+        Returns:
+            None: The function sends the request but does not return a specific response.
+        """
+        
         endpoint = "/deletevectordatabase"
         URL = f"{self.radConfig.ip}{endpoint}"  
         database_id = self.DBusers.get_database_id_by_user_and_numdb(user, database_number)
