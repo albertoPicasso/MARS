@@ -12,7 +12,7 @@ class ViewAgent:
         self.setup_routes()
         self.read_agents_config()
         #self.register_control_agent()
-        #Database represent a selected knowledge database. It is used to do some checks son best initial state is a invalid state to avoid unforeseen state updates till user select a database manually
+        #Database represent a selected knowledge database. It is used to do some checks some best initial state is a invalid state to avoid unforeseen state updates till user select a database manually
         self.database = "aaa" 
         
     

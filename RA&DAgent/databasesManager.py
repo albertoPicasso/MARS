@@ -1,3 +1,5 @@
+from statusDatabaseManager import StatusEnum, StatusDatabaseManager
+
 from langchain.document_loaders import PyPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
@@ -14,7 +16,7 @@ class DatabasesManager:
     def __init__(self): 
         self.route = os.path.join(os.getcwd(), "RA&DAgent" ,"databases")
         self.embedding_model = HuggingFaceEmbeddings(model_name="paraphrase-multilingual-mpnet-base-v2")
-        
+        self.status_database = StatusDatabaseManager()
         
 
     def create_database(self, container_path:str, database_name:str):
@@ -164,6 +166,7 @@ class DatabasesManager:
                 embedding=self.embedding_model,
                 persist_directory = path
             )
+            self.status_database.update_entry_status(database_id=database_name, new_status=StatusEnum.ready)
 
             
     def retrieval_augmented(self, database_name: str, query_text: str, top_k: int = 5, similarity_threshold: float = 0.7):

@@ -1,6 +1,9 @@
+from statusDatabaseManager import StatusEnum, StatusDatabaseManager
+
 from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response
 from cryptoManager import CryptoManager
 from databasesManager import DatabasesManager
+
 import os 
 import uuid
 
@@ -10,7 +13,7 @@ class retrievalAndDatabaseAgent:
         self.app = Flask(__name__)
         self.setup_routes()
         self.database_manager = DatabasesManager()
-        
+        self.status_database = StatusDatabaseManager()
     
     def setup_routes(self):
         self.app.add_url_rule('/createvectordatabase', 'createvectordatabase', self.create_vector_database, methods=['POST'])
@@ -71,10 +74,10 @@ class retrievalAndDatabaseAgent:
             save_path = os.path.join ("RA&DAgent",folder_name,fileNames[i])
             CryptoManager.decrypt_pdf(files[i], save_path)
             
-        print (folder_path, folder_name)
-        
+        self.status_database.add_entry(database_id=folder_name, status_value=StatusEnum.processing)
+        #Create a thread to this func
         self.database_manager.create_database(folder_path, folder_name)
-
+    
         response = make_response(jsonify({"database_id": folder_name}), 200)
         return response
         
