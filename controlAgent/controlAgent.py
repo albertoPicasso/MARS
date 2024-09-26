@@ -5,6 +5,7 @@ from configClasses.radConfig import RadConfig
 import uuid
 import os 
 import requests
+import json
 
 class ControlAgent: 
     
@@ -17,6 +18,7 @@ class ControlAgent:
         
     def setup_routes(self):
         self.app.add_url_rule('/createNewDatabase', 'createNewDatabase', self.createNewDatabase, methods=['POST'])
+        self.app.add_url_rule('/processMessage', 'processMessage', self.process_message, methods=['POST'])
             
     def createNewDatabase(self):
         """
@@ -137,7 +139,7 @@ class ControlAgent:
             database_number = self.get_database_number(database_slot)
             has_assigned = self.DBusers.has_assigned_db(user, database_number)
             if (has_assigned):
-                self.delete_database(user=user, database_number=database_number)
+                self._delete_database(user=user, database_number=database_number)
                 
             self.DBusers.update_databaseID(username=user, database_number=database_number, new_databaseID=database_id)
             self.delete_directory(folder_path)
@@ -148,7 +150,7 @@ class ControlAgent:
             return response
 
 
-    def delete_database(self, user, database_number ):   
+    def _delete_database(self, user, database_number ):   
         """
         Deletes a database from the selected RA&D agent for a specific user and database number.
 
@@ -159,7 +161,6 @@ class ControlAgent:
         Returns:
             None: The function sends the request but does not return a specific response.
         """
-        
         endpoint = "/deletevectordatabase"
         URL = f"{self.radConfig.ip}{endpoint}"  
         database_id = self.DBusers.get_database_id_by_user_and_numdb(user, database_number)
@@ -169,9 +170,69 @@ class ControlAgent:
             "encrypted_database_id": encrypted_database_id
         }
         
-        response = requests.post(URL, json=data)
+        requests.post(URL, json=data)
+        
+   
+    def process_message(self):
+
+        endpoint = "/getretrievalcontext"
+        URL = f"{self.radConfig.ip}{endpoint}"
+
+        encrypted_data = request.get_json()
+
+        if isinstance(encrypted_data, str):
+            encrypted_data = json.loads(encrypted_data)
+
+        cipher_text = encrypted_data.get('cipherData')
+        decrypted_data = CryptoManager.decrypt_text(cipher_text)
+        
+        data = json.loads(decrypted_data)
+        
+        user = data.get('user')
+        password = data.get('pass')
+        chat = data.get("chat")
+        database_slot = data.get("database")
+        database_slot_number = self.get_database_number(database_slot)
+            
+        result = self.DBusers.verify_user(user, password)
+        
+        if not result:
+            abort(403, description="Invalid credentials")
+        
+        if None in (user, password, chat, database_slot):
+            missing_fields = [key for key in ['user', 'pass', 'chat', 'database'] if data.get(key) is None]
+            return jsonify({"error": "Missing arguments in the JSON", "missing_fields": missing_fields}), 400
+
+        messages = json.loads(chat)
+        database = self.DBusers.get_database_id_by_user_and_numdb(username=user, numdb=database_slot_number)
+        
+        #Get retrieval of a last user message
+        last_message = messages[-1].get("text")
+        #Prepare data to send
+        data = {
+            "last_message":last_message,
+            "database": database
+        }
+        json_data = json.dumps(data)
+        cipherData = CryptoManager.encrypt_text(json_data, self.radConfig.cypherPass)
+        data_to_send = {"cipherData": cipherData}
+        
+        context = requests.post(URL, json=data_to_send)
+        
+        #Get response data
+        if context.status_code == 200:
+            data = context.json()
+            cipher_data = data['cipherData']
+            decrypted_data = CryptoManager.decrypt_text(cipher_data, self.radConfig.cypherPass)
+            print(decrypted_data)  
+        else:
+            print(f'Error al obtener los datos: {context.status_code}')
         
         
+        return jsonify({'status': 'success', 'message': 'Message processed successfully'})
+
+
+            
     #Aux functions
     def delete_directory(self, path):
         if os.path.exists(path):            
@@ -195,6 +256,9 @@ class ControlAgent:
                 return 3
             case _: 
                 return -1
+            
+            
+    
             
     def run(self):
         self.app.run(port=5006, debug=True)

@@ -1,21 +1,24 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
+from cryptoManager import CryptoManager
 import os
 import requests
-from cryptoManager import CryptoManager
-import base64
+import json
 
 
 class ViewAgent:
+    
     def __init__(self):
         self.app = Flask(__name__)
         self.configure_upload_folder()
         self.setup_routes()
         self.read_agents_config()
-        #self.register_control_agent()
-        #Database represent a selected knowledge database. It is used to do some checks some best initial state is a invalid state to avoid unforeseen state updates till user select a database manually
         self.database = "aaa" 
+        self.messages = {
+            'db1':[],
+            'db2':[],
+            'db3':[],
+            }
         
-    
     def configure_upload_folder(self):
         self.UPLOAD_FOLDER = 'viewAgent/uploads/'
         self.app.config['UPLOAD_FOLDER'] = self.UPLOAD_FOLDER
@@ -26,9 +29,14 @@ class ViewAgent:
         #Return HTML files
         self.app.add_url_rule('/', 'home', self.home)
         self.app.add_url_rule('/uploadFile', 'upload_file', self.upload_file)                 
+        
         #Request control server
         self.app.add_url_rule('/send_message', 'send_message', self.send_message, methods=['POST']) 
         self.app.add_url_rule('/upload', 'upload', self.upload, methods=['POST'])
+        
+        #States control
+        self.app.add_url_rule('/clear_messages', 'clear_messages', self.clear_messages, methods=['POST']) 
+        
         
     def read_agents_config(self):
         base_dir = os.path.abspath(os.path.dirname(__file__))
@@ -58,18 +66,7 @@ class ViewAgent:
         self.database = db_name.lower()
         return render_template('uploadFile.html')
 
-
-
-
-    def send_message(self):
-        user_message = request.json.get('message')
-        additional_param = request.json.get('currentDB')
-
-        response_message = f"Echo: {user_message}, Param: {additional_param if additional_param is not None else 'None'}"
-        return jsonify({'response': response_message})
-
-
-
+    ## Features
 
     def upload(self):
         if 'file' not in request.files:
@@ -117,6 +114,7 @@ class ViewAgent:
             "elementNames": elementNames,
             "content" : contentString
         }
+
         
         response = requests.post(URL, json=data)
         delete_path = os.path.join("viewAgent", "uploads")
@@ -126,8 +124,54 @@ class ViewAgent:
         #Close uploader tab 
         return render_template('close_windows.html')
 
+    def send_message(self):
+        endpoint = "/processMessage"
+        URL = f"{self.controlAgentIP}{endpoint}"
+        
+        user_message = request.json.get('message')
+        currentDB = request.json.get('currentDB')
+        
+        self.messages[currentDB].append({'type': 'HumanMessage', 'text': user_message})
+        
+        ''' 
+        Steps: 
+            1- Create a Json contains al messages
+            2- Cypher Json with Cyphertext
+            3- Send to control and wait response
+            4- Add response to database
+            5- return response to js file     
+        '''
+        json_chat = self.get_messages_as_json(currentDB)
+        
+        
+        data = {
+            "user":self.user,
+            "pass":self.passcode,
+            "chat":json_chat, 
+            "database":currentDB
+        }
+        json_data = json.dumps(data)
+        
+        cipherData = CryptoManager.encrypt_text(json_data, self.passForCipher)
+        data_to_send = {"cipherData": cipherData}
+        response = requests.post(URL, json=data_to_send)
+        
+        response_message = f"Echo: {user_message}, Param: {currentDB if currentDB is not None else 'None'}"
+        
+        self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})
+        
+        return jsonify({'response': response_message})
 
 
+    
+    def clear_messages(self):
+        self.messages['db1'] = []
+        self.messages['db2'] = []
+        self.messages['db3'] = []
+        
+        return jsonify({'status': 'Messages cleared successfully'})
+
+    #Aux function
     def empty_directory(self, path):
         """Empty a directory of all its contents without deleting the directory itself."""
         if os.path.exists(path):
@@ -140,6 +184,14 @@ class ViewAgent:
                     else:
                         os.remove(item_path)
             
+            
+    def get_messages_as_json(self, db):
+        if db in self.messages:
+            db_json = json.dumps(self.messages[db])
+            return db_json
+        else:
+            print(f"Database {db} not found!")
+            return None
 
     def run(self):
         self.app.run(port=5005, debug=True)

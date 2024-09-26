@@ -7,6 +7,7 @@ from databasesManager import DatabasesManager
 import os 
 import uuid
 import threading
+import json
 
 class retrievalAndDatabaseAgent: 
     
@@ -15,11 +16,13 @@ class retrievalAndDatabaseAgent:
         self.setup_routes()
         self.database_manager = DatabasesManager()
         self.status_database = StatusDatabaseManager()
+        
     
     def setup_routes(self):
         self.app.add_url_rule('/createvectordatabase', 'createvectordatabase', self.create_vector_database, methods=['POST'])
         self.app.add_url_rule('/deletevectordatabase', 'deletevectordatabase', self.delete_vector_database, methods=['POST'])
-    
+        self.app.add_url_rule('/getretrievalcontext', 'getretrievalcontext', self.get_retrieval_context, methods=['POST'])
+         
     def create_vector_database(self):
         """
         Creates a new vector database from the provided encrypted PDF content.
@@ -115,6 +118,38 @@ class retrievalAndDatabaseAgent:
             
         return response
     
+    
+    def get_retrieval_context(self):
+        
+        encrypted_data = request.get_json()
+
+        if isinstance(encrypted_data, str):
+            encrypted_data = json.loads(encrypted_data)
+
+        cipher_text = encrypted_data.get('cipherData')
+        decrypted_data = CryptoManager.decrypt_text(cipher_text)
+        
+        data = json.loads(decrypted_data)
+        
+        message = data.get('last_message')
+        database = data.get('database')
+        
+        database_status = self.status_database.get_database_status(database_id=database)
+        
+        if (database_status != StatusEnum.ready):
+            if (database_status != StatusEnum.deleted):
+                response = make_response(jsonify({"Error": "Deleted Database"}), 503)
+            if (database_status != StatusEnum.processing):
+                response = make_response(jsonify({"Error": "Processing Database"}), 503)
+            return response
+        
+        context = self.database_manager.get_context(database_name=database, query_text=message)
+        context_json = json.dumps([{"page_content": doc.page_content, "metadata": doc.metadata} for doc in context])
+        cipherData = CryptoManager.encrypt_text(context_json)
+        response = make_response(jsonify({"cipherData": cipherData}), 200)
+        return response
+    
+        
     
     
     def run(self):

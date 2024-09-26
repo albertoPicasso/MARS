@@ -28,7 +28,7 @@ class CryptoManager:
         return ciphertext_base64
 
 
-    def decrypt_text(ciphertext_base64: str, key_string = "1234567890abcdef1234567890abcdef") -> str:
+    def decrypt_text(ciphertext_base64: str, key_string : str) -> str:
         key = hashlib.sha256(key_string.encode()).digest()
 
         ciphertext_combined = base64.b64decode(ciphertext_base64)

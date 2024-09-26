@@ -71,3 +71,24 @@ function addMessageToChat(className, message) {
     chat.appendChild(messageElement);
     chat.scrollTop = chat.scrollHeight;
 }
+
+
+window.onload = function() {
+    fetch('/clear_messages', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data.status);  
+        messageHistories.db1 = [];
+        messageHistories.db2 = [];
+        messageHistories.db3 = [];
+        updateChat();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+};

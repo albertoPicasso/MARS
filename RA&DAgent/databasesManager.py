@@ -172,7 +172,7 @@ class DatabasesManager:
             self.status_database.update_entry_status(database_id=database_name, new_status=StatusEnum.ready)
             
             
-    def retrieval_augmented(self, database_name: str, query_text: str, top_k: int = 5, similarity_threshold: float = 0.7):
+    def get_context(self, database_name: str, query_text: str, top_k: int = 5, similarity_threshold: float = 0.7):
         """
         Performs retrieval-augmented search on the specified database using the provided query text.
 
@@ -198,9 +198,14 @@ class DatabasesManager:
         
         path = os.path.join(self.route, database_name)    
         
+        database_status = self.status_database.get_database_status(database_id=database_name)
+        
+        if (database_status != StatusEnum.ready):
+            return None     
+        
         vector_store_loaded = Chroma(persist_directory=path, embedding_function=self.embedding_model)
         
-        retriever = vector_store_loaded.as_retriever(search_type="mmr", search_kwargs={"k": top_k})
+        retriever = vector_store_loaded.as_retriever(search_type="similarity", search_kwargs={"k": top_k})
         
         retrieved_docs = retriever.invoke(query_text)
         

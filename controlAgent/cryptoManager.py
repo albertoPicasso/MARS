@@ -7,7 +7,7 @@ import os
 
 class CryptoManager: 
     
-    def encrypt_text(plain_text: str, key_string: str) -> str:
+    def encrypt_text(plain_text: str, key_string: str = "1234567890abcdef1234567890abcdef") -> str:
         key = hashlib.sha256(key_string.encode()).digest()
         
         iv = os.urandom(16)
@@ -49,7 +49,7 @@ class CryptoManager:
         return plain_text
     
     
-    def encrypt_pdf(file_path: str, key_string: str) -> str:
+    def encrypt_pdf(file_path: str, key_string: str = "1234567890abcdef1234567890abcdef") -> str:
         with open(file_path, 'rb') as file:
             pdf_bytes = file.read()
                 

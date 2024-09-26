@@ -68,6 +68,7 @@ class StatusDatabaseManager:
                 self.db.close()
 
     def update_entry_status(self, database_id: str, new_status: str) -> bool:
+        
         if new_status not in [status.value for status in StatusEnum]:
             return False
     
@@ -85,6 +86,14 @@ class StatusDatabaseManager:
             return False
         finally:
             self.db.close()
+
+    def get_database_status(self, database_id: str): 
+        
+        self.db.connect() 
+        status = Databases.select().where(Databases.database_id == database_id).get()
+        self.db.close()
+        return status.status
+
 
 # Función principal donde se gestionan las operaciones
 def main():
