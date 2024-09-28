@@ -2,6 +2,7 @@ from flask import Flask, request,jsonify, abort, make_response
 from databaseManager import DatabaseManager
 from cryptoManager import CryptoManager
 from configClasses.radConfig import RadConfig
+from configClasses.generationConfig import GenerationConfig
 import uuid
 import os 
 import requests
@@ -14,6 +15,7 @@ class ControlAgent:
         self.setup_routes()
         self.DBusers = DatabaseManager()
         self.radConfig = RadConfig()
+        self.generationConfig = GenerationConfig()
         #self.DBusers.show_database()
         
     def setup_routes(self):
@@ -134,7 +136,6 @@ class ControlAgent:
             data = response.json()
             cypher_database_id = data.get("database_id")
             database_id = CryptoManager.decrypt_text(cypher_database_id, self.radConfig.cypherPass)
-            print(database_id)
             #if slot already have a database delete it to avoid leftovers
             database_number = self.get_database_number(database_slot)
             has_assigned = self.DBusers.has_assigned_db(user, database_number)
@@ -173,6 +174,8 @@ class ControlAgent:
         requests.post(URL, json=data)
         
    
+   
+   
     def process_message(self):
 
         endpoint = "/getretrievalcontext"
@@ -207,8 +210,10 @@ class ControlAgent:
         database = self.DBusers.get_database_id_by_user_and_numdb(username=user, numdb=database_slot_number)
         
         #Get retrieval of a last user message
+        
         last_message = messages[-1].get("text")
-        #Prepare data to send
+            
+            #Prepare data to send
         data = {
             "last_message":last_message,
             "database": database
@@ -219,16 +224,41 @@ class ControlAgent:
         
         context = requests.post(URL, json=data_to_send)
         
-        #Get response data
+            #Get response data
         if context.status_code == 200:
             data = context.json()
             cipher_data = data['cipherData']
             decrypted_data = CryptoManager.decrypt_text(cipher_data, self.radConfig.cypherPass)
-            print(decrypted_data)  
+              
         else:
-            print(f'Error al obtener los datos: {context.status_code}')
+            return jsonify({'status': 'Internal Error'}, 500)
+            
+        ##Generate response from generator Agent
+
+            #Prepare data to send
+        data = {
+            "chat" : messages,
+            "context": decrypted_data
+        }
         
+        json_data = json.dumps(data)
+        cipherData = CryptoManager.encrypt_text(json_data, self.generationConfig.cypherPass)
+        data_to_send = {"cipherData": cipherData}
+
+            #Prepare URL
+        endpoint = "/generationwithmessagehistory"
+        URL = f"{self.generationConfig.ip}{endpoint}"  
+           
+            #Send
+        generation = requests.post(URL, json=data_to_send)
         
+        if generation.status_code == 200:
+            data = generation.json()  # Parsear la respuesta JSON
+            ciphered_generation = data['cipher_response'] 
+            generation = CryptoManager.decrypt_text(ciphered_generation, self.generationConfig.cypherPass)
+            ciphered_generation = CryptoManager.encrypt_text(generation)
+            return jsonify({"cipher_response": ciphered_generation}), 200
+            
         return jsonify({'status': 'success', 'message': 'Message processed successfully'})
 
 

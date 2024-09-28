@@ -5,3 +5,5 @@ controlAgent/__pycache__
 RA&DAgent/databases
 RA&DAgent/__pycache__
 RA&DAgent/status_database.db
+generationAgent/__pycache__
+generationAgent/apiFile.txt

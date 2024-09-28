@@ -154,9 +154,17 @@ class ViewAgent:
         
         cipherData = CryptoManager.encrypt_text(json_data, self.passForCipher)
         data_to_send = {"cipherData": cipherData}
-        response = requests.post(URL, json=data_to_send)
+        generation = requests.post(URL, json=data_to_send)
         
-        response_message = f"Echo: {user_message}, Param: {currentDB if currentDB is not None else 'None'}"
+        if generation.status_code == 200:
+            data = generation.json()  # Parsear la respuesta JSON
+            ciphered_generation = data['cipher_response'] 
+            generation_json = CryptoManager.decrypt_text(ciphered_generation, self.passForCipher)
+            generation = json.loads(generation_json)
+            text = generation["generation"]
+            
+        #response_message = f"Echo: {user_message}, Param: {currentDB if currentDB is not None else 'None'}"
+        response_message = text 
         
         self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})
         

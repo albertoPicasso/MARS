@@ -120,7 +120,26 @@ class retrievalAndDatabaseAgent:
     
     
     def get_retrieval_context(self):
-        
+        """
+        Retrieves the retrieval context based on encrypted input data.
+
+        This function processes a JSON request containing encrypted data. It decrypts the 
+        cipher text to extract the last message and the database identifier. It then checks 
+        the status of the specified database to determine if it is ready for retrieval. If the 
+        database is in a state that is not ready, it responds with an appropriate error message. 
+        If the database is ready, it retrieves the relevant documents from the database context, 
+        encrypts this context, and returns it in the response.
+
+        Returns:
+            Response: A Flask response object containing either:
+                - A JSON object with the encrypted context under the key "cipherData" if 
+                the operation is successful.
+                - An error message in JSON format if the database status is not ready.
+
+        Raises:
+            ValueError: If the decrypted data does not contain expected fields.
+        """
+    
         encrypted_data = request.get_json()
 
         if isinstance(encrypted_data, str):
