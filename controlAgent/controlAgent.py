@@ -70,72 +70,79 @@ class ControlAgent:
 
         """
 
-        json = request.get_json()
+        encrypted_data = request.get_json()
+
+        if isinstance(encrypted_data, str):
+            encrypted_data = json.loads(encrypted_data)
+
+        cipher_text = encrypted_data.get('cipherData')
+        decrypted_data = CryptoManager.decrypt_text(cipher_text)
+        data = json.loads(decrypted_data)
+  
+        required_fields = ['user', 'pass', 'database', 'files']
+        missing_fields = [field for field in required_fields if data.get(field) is None]
+
+        if missing_fields:
+            return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
+
+        user = data["user"]
+        password = data ["pass"]
+        database_slot = data ["database"]
+        files = data ["files"]
     
-        user = json.get('user')
-        cryptpassword = json.get('pass')
-        password = CryptoManager.decrypt_text(cryptpassword)
-        database_slot = json.get ('database')
-        elementNames = json.get ('elementNames')
-        content = json.get('content')
-        
+                
         result = self.DBusers.verify_user(user, password)
         
         ## Not auth user
         if (not result):
             abort(403, description="Invalid credentials")
-            
-        ## Not al necessary fields
-        if None in (user, cryptpassword, database_slot, elementNames, content):
-            missing_fields = [key for key in ['user', 'pass', 'database', 'elementNames', 'content'] if json.get(key) is None]
-            return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
-        
-        ## Decrypt info
-        fileNames = elementNames.split('#')
-        files = content.split('\n')
         
         folder_name = str(uuid.uuid4())
         folder_path = os.path.join("controlAgent", folder_name)
         os.makedirs(folder_path)
         
-        #Save pdfs in the container 
-        for i in range(len(files) - 1):
-            save_path = os.path.join ("controlAgent",folder_name,fileNames[i])
-            CryptoManager.decrypt_pdf(files[i], save_path)
-            
-        ##Preprocess data 
+        self.save_pdfs(container=folder_path, files=files)
+        
         endpoint = "/createvectordatabase"
         URL = f"{self.radConfig.ip}{endpoint}"
-        contentString=""
-        elementNames = ""
+        
         uploadPath = folder_path
         
+        filesList = []
         for file in os.listdir(uploadPath):
             filePath = os.path.join(uploadPath, file)
-            if os.path.isfile(filePath) and file.lower().endswith('.pdf'):
-                with open(filePath, 'rb') as file:
-                    auxName = file.name.split(os.sep)
-                    name = auxName[len(auxName) -1]
-                    elementNames = elementNames + name + '#'
-                    encryptedFile = CryptoManager.encrypt_pdf(filePath, self.radConfig.cypherPass)
-                    contentStringaux = encryptedFile + '\n'
-                    contentString = contentString + contentStringaux
-               
-          
-        data = {
-            "elementNames": elementNames,
-            "content" : contentString
-        }
+            if os.path.isfile(filePath) and file.lower().endswith('.pdf'):          
+                
+                with open(filePath, 'rb') as pdf_file:
+                    pdf_bytes = pdf_file.read()
+                    auxName = file.split(os.sep)
+                    name = auxName[-1]
+                    file_data = {
+                        "title": name,
+                        "content": pdf_bytes.hex()  # Almacena las páginas como una lista
+                    }
+                filesList.append(file_data)
 
-        #Send request to RA&D to create new database 
-        response = requests.post(URL, json=data)
+        data = {
+            "files": filesList
+        }
         
+        json_data = json.dumps(data)
+        
+        cipherData = CryptoManager.encrypt_text(json_data, self.radConfig.cypherPass)
+        data_to_send = {"cipherData": cipherData}
+        
+        response = requests.post(URL, json=data_to_send)
+
         ##Update users database to include new database 
         if response.status_code == 200:
             #extact data from json
             data = response.json()
-            cypher_database_id = data.get("database_id")
-            database_id = CryptoManager.decrypt_text(cypher_database_id, self.radConfig.cypherPass)
+            cipherData = data.get("cipherData")
+            decrypted_data  = CryptoManager.decrypt_text(cipherData, self.radConfig.cypherPass)
+            data = json.loads(decrypted_data)
+            database_id = data["database_id"]
+            
             #if slot already have a database delete it to avoid leftovers
             database_number = self.get_database_number(database_slot)
             has_assigned = self.DBusers.has_assigned_db(user, database_number)
@@ -144,6 +151,8 @@ class ControlAgent:
                 
             self.DBusers.update_databaseID(username=user, database_number=database_number, new_databaseID=database_id)
             self.delete_directory(folder_path)
+            
+            #No cipher content bc only need to check status code
             response = make_response(jsonify({"Status": "ok"}), 200)
             return response
         else:
@@ -164,14 +173,19 @@ class ControlAgent:
         """
         endpoint = "/deletevectordatabase"
         URL = f"{self.radConfig.ip}{endpoint}"  
-        database_id = self.DBusers.get_database_id_by_user_and_numdb(user, database_number)
-        encrypted_database_id = CryptoManager.encrypt_text(database_id, self.radConfig.cypherPass)
         
+        database_id = self.DBusers.get_database_id_by_user_and_numdb(user, database_number)
+    
         data = {
-            "encrypted_database_id": encrypted_database_id
+            "database_id": database_id
         }
         
-        requests.post(URL, json=data)
+        json_data = json.dumps(data)
+        
+        cipherData = CryptoManager.encrypt_text(json_data, self.radConfig.cypherPass)
+        data_to_send = {"cipherData": cipherData}
+        
+        requests.post(URL, json=data_to_send)
         
    
    
@@ -218,6 +232,7 @@ class ControlAgent:
             "last_message":last_message,
             "database": database
         }
+        
         json_data = json.dumps(data)
         cipherData = CryptoManager.encrypt_text(json_data, self.radConfig.cypherPass)
         data_to_send = {"cipherData": cipherData}
@@ -287,7 +302,22 @@ class ControlAgent:
             case _: 
                 return -1
             
+    
+    import os
+
+    def save_pdfs(self, container, files):
+       
+        for file in files:
+            file_name = file.get('title')
             
+            pdf_bytes = bytes.fromhex(file.get('content'))
+            
+            file_path = os.path.join(container, file_name)
+            
+            with open(file_path, 'wb') as pdf_file:
+                pdf_file.write(pdf_bytes)
+
+        
     
             
     def run(self):

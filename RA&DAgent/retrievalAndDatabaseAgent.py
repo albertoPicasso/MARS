@@ -58,32 +58,44 @@ class retrievalAndDatabaseAgent:
             - A unique folder name is generated for each new database creation process to avoid conflicts.
         """
         
-        json = request.get_json()
-    
-        elementNames = json.get ('elementNames')
-        content = json.get('content')
+        encrypted_data = request.get_json()
+
+        if isinstance(encrypted_data, str):
+            encrypted_data = json.loads(encrypted_data)
+
+        cipher_text = encrypted_data.get('cipherData')
+        decrypted_data = CryptoManager.decrypt_text(cipher_text)
+        data = json.loads(decrypted_data)
         
-        if None in (elementNames, content):
-            missing_fields = [key for key in ['elementNames', 'content'] if json.get(key) is None]
+        required_fields = ['files']
+        missing_fields = [field for field in required_fields if data.get(field) is None]
+
+        if missing_fields:
             return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
-        
-        fileNames = elementNames.split('#')
-        files = content.split('\n')
+
+        files = data ["files"]
         
         folder_name = str(uuid.uuid4())
         folder_path = os.path.join("RA&DAgent", folder_name)
         os.makedirs(folder_path)
         
-        for i in range(len(files) - 1):           
-            save_path = os.path.join ("RA&DAgent",folder_name,fileNames[i])
-            CryptoManager.decrypt_pdf(files[i], save_path)
+        self.save_pdfs(container=folder_path, files=files)
             
         self.status_database.add_entry(database_id=folder_name, status_value=StatusEnum.processing)
         #Create a thread to this func
         thread = threading.Thread(target=self.database_manager.create_database, args=(folder_path, folder_name))
         thread.start()
-        cypher_database_name = CryptoManager.encrypt_text(folder_name)
-        response = make_response(jsonify({"database_id": cypher_database_name}), 200)
+        
+        data = {
+            "database_id": folder_name
+        }
+        
+        json_data = json.dumps(data)
+        
+        cipherData = CryptoManager.encrypt_text(json_data)
+        data_to_send = {"cipherData": cipherData}
+        
+        response = data_to_send, 200
         return response
     
     
@@ -109,9 +121,16 @@ class retrievalAndDatabaseAgent:
         Returns:
             Response: A JSON response with a 200 OK status indicating that the database deletion was processed.
         """
-        json = request.get_json()
-        encrypted_database_id  = json.get ('encrypted_database_id')
-        database_id = CryptoManager.decrypt_text(encrypted_database_id)
+        encrypted_data = request.get_json()
+
+        if isinstance(encrypted_data, str):
+            encrypted_data = json.loads(encrypted_data)
+
+        cipher_text = encrypted_data.get('cipherData')
+        decrypted_data = CryptoManager.decrypt_text(cipher_text)
+        data = json.loads(decrypted_data)
+        database_id = data["database_id"]
+        
         self.status_database.update_entry_status(database_id=database_id, new_status=StatusEnum.deleted)
         
         response = make_response(jsonify({"OK": "OK"}), 200)
@@ -168,7 +187,19 @@ class retrievalAndDatabaseAgent:
         response = make_response(jsonify({"cipherData": cipherData}), 200)
         return response
     
-        
+    
+    def save_pdfs(self, container, files):
+       
+        for file in files:
+            file_name = file.get('title')
+            
+            pdf_bytes = bytes.fromhex(file.get('content'))
+            
+            file_path = os.path.join(container, file_name)
+            
+            with open(file_path, 'wb') as pdf_file:
+                pdf_file.write(pdf_bytes)
+
     
     
     def run(self):

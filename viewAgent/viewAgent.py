@@ -3,6 +3,8 @@ from cryptoManager import CryptoManager
 import os
 import requests
 import json
+from langchain.document_loaders import PyPDFLoader
+from fpdf import FPDF
 
 
 class ViewAgent:
@@ -90,33 +92,38 @@ class ViewAgent:
         '''
         endpoint = "/createNewDatabase"
         URL = f"{self.controlAgentIP}{endpoint}"
-
-        contentString=""
-        elementNames = ""
-        uploadPath = os.path.join("viewAgent", "uploads")
         
+        uploadPath = os.path.join("viewAgent", "uploads")
+
+        filesList = []
         for file in os.listdir(uploadPath):
             filePath = os.path.join(uploadPath, file)
-            if os.path.isfile(filePath) and file.lower().endswith('.pdf'):
-                with open(filePath, 'rb') as file:
-                    auxName = file.name.split(os.sep)
-                    name = auxName[len(auxName) -1]
-                    elementNames = elementNames + name + '#'
-                    encryptedFile = CryptoManager.encrypt_pdf(filePath, self.passForCipher)
-                    contentStringaux = encryptedFile + '\n'
-                    contentString = contentString + contentStringaux
-               
-          
-        data = {
-            "user":self.user,
-            "pass":self.cipheredPass,
-            "database": self.database,
-            "elementNames": elementNames,
-            "content" : contentString
-        }
+            if os.path.isfile(filePath) and file.lower().endswith('.pdf'):          
+                
+                with open(filePath, 'rb') as pdf_file:
+                    pdf_bytes = pdf_file.read()
+                    auxName = file.split(os.sep)
+                    name = auxName[-1]
+                    file_data = {
+                        "title": name,
+                        "content": pdf_bytes.hex()  # Almacena las páginas como una lista
+                    }
+                filesList.append(file_data)
 
         
-        response = requests.post(URL, json=data)
+        data = {
+            "user":self.user,
+            "pass":self.passcode,
+            "database": self.database,
+            "files":filesList
+        }
+
+        json_data = json.dumps(data)
+        
+        cipherData = CryptoManager.encrypt_text(json_data, self.passForCipher)
+        data_to_send = {"cipherData": cipherData}
+        
+        response = requests.post(URL, json=data_to_send)
         delete_path = os.path.join("viewAgent", "uploads")
         self.empty_directory(delete_path)
         self.database = "aaa"
@@ -200,6 +207,7 @@ class ViewAgent:
         else:
             print(f"Database {db} not found!")
             return None
+        
 
     def run(self):
         self.app.run(port=5005, debug=True)
