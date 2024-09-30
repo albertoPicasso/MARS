@@ -10,6 +10,7 @@
 
 <h2>What is MARS? </h2>
 <p>MARS is an intuitive platform designed for the rapid and effortless creation of RAG systems using your own PDF files. It offers a comprehensive suite of tools for seamless document interaction, encompassing everything from an  user interface to  database management and response generation.</p>
+<p>Additionally, MARS allows each user in the system to have up to three different knowledge bases from which context can be retrieved.</p>
 
 <h2>MARS architecture</h2>
 <td><img src="images/architecture.png" alt="Architecture" width="500"></td>
@@ -69,3 +70,24 @@ The current implementation looks like this:
 <a href="https://youtu.be/inJnUh2JDbo" target="_blank">
     <img src="https://img.youtube.com/vi/inJnUh2JDbo/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
 </a>
+<p> </p>
+<p>    The test file contains notes on how Linux works.</p>
+
+<h2>Known issues</h2>
+<ul>
+  <li>When a new database is created in an already used slot, the internal process works fine, but the previous message history is not cleared, and it is recommended to refresh the webpage.<p> </p></li>
+  <li>There are some issues when deleting databases and content in the RAG Agent. This is due to background processes that do not complete execution when creating embeddings or accessing the database. Therefore, although the system updates its tables correctly, the vector databases and temporary files need to be deleted manually for now.<p> </p></li>
+</ul>
+
+
+<h2>Next steps</h2>
+<p>Create a better way to receive data via JSON by defining schemas for the required data structure using Pydantic, and manage all related data encapsulated within a class instead of using individual variables.</p><p> </p>
+
+<p>Enhance error handling and traceability by utilizing logging.</p><p> </p>
+
+<h2>Technologies used</h2>
+<ul>
+  <li>Flask as server</li>
+  <li>GPT 4o mini as llm</li>
+  <li>Chroma as Vector Database</li>
+</ul>
