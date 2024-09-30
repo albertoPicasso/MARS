@@ -54,7 +54,6 @@ class ViewAgent:
         self.controlAgentIP = config.get('ip', 'http://default_ip')
         self.user = config.get('user', 'default_user')
         self.passForCipher = config.get('cypherPass', 'default_cypherPass')
-        self.cipheredPass = CryptoManager.encrypt_text(self.passcode,self.passForCipher)
 
          
     ##HTML returns
@@ -161,16 +160,17 @@ class ViewAgent:
         
         cipherData = CryptoManager.encrypt_text(json_data, self.passForCipher)
         data_to_send = {"cipherData": cipherData}
+        return jsonify({'response': "Hola bb"})
         generation = requests.post(URL, json=data_to_send)
         
         if generation.status_code == 200:
-            data = generation.json()  # Parsear la respuesta JSON
+            data = generation.json()  
             ciphered_generation = data['cipher_response'] 
             generation_json = CryptoManager.decrypt_text(ciphered_generation, self.passForCipher)
             generation = json.loads(generation_json)
             text = generation["generation"]
             
-        #response_message = f"Echo: {user_message}, Param: {currentDB if currentDB is not None else 'None'}"
+        
         response_message = text 
         
         self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})

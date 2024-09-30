@@ -216,9 +216,12 @@ class ControlAgent:
         if not result:
             abort(403, description="Invalid credentials")
         
-        if None in (user, password, chat, database_slot):
-            missing_fields = [key for key in ['user', 'pass', 'chat', 'database'] if data.get(key) is None]
-            return jsonify({"error": "Missing arguments in the JSON", "missing_fields": missing_fields}), 400
+        required_fields = ['user', 'pass', 'database', 'chat']
+        missing_fields = [field for field in required_fields if data.get(field) is None]
+
+        if missing_fields:
+            return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
+
 
         messages = json.loads(chat)
         database = self.DBusers.get_database_id_by_user_and_numdb(username=user, numdb=database_slot_number)
