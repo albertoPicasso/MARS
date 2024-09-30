@@ -41,6 +41,7 @@
   <li>Configure each agent to enable communication with the other agents.</li>
   <p>To do this, you must fill in the fields of the information files with the appropriate data. These files are located in the <i>configFiles</i> folder, with one in the <i>View Agent</i> and another in the <i>Control Agent</i>. Only the required information should be changed; do not alter the field names. These files are used to populate the configuration classes.</p>
 <p> </p>
+<td><img src="images/configFiles.png" alt="configFiles" width="150"></td>
   
   <li>Provide the OpenAI key</li>
   <p>In the <i>Generation Agent</i>, create a file named <i>apiFile.txt</i>, which should contain the OpenAI API key necessary for using the LLM.</p>
