@@ -1,4 +1,3 @@
-
 html, body {
     height: 100%;
     margin: 0;
@@ -11,7 +10,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: rgb(135, 135, 135); 
+    background-color: #bfc9df; 
     margin: 0;
     padding: 0;
     position: relative; 
@@ -51,6 +50,7 @@ body {
     background: rgba(255, 255, 255, 0.8); 
     line-height: 1.5;
 }
+
 .user-message {
     background-color: #cf8341; 
     color: #fff;
@@ -59,6 +59,7 @@ body {
     transition: background-color 0.3s, border-color 0.3s;
     box-shadow: 1px 0 3px  #312142 ;
 }
+
 .response-message {
     background-color: #8babf1; 
     color: #070606;
@@ -94,7 +95,6 @@ body {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease;
-
     border: 1px solid #312142 ;
 }
 
@@ -113,14 +113,12 @@ body {
     border-radius: 8px;
     cursor: pointer;
     font-size: 16px;
-    margin-top: 10px;
-    transition: background-color 0.3s ease;
-    border: 1px solid #312142 ;
-
     margin-left: auto;
     margin-top: 10px;
     margin-bottom: 10px;
     margin-right: 10px;
+    transition: background-color 0.3s ease;
+    border: 1px solid #312142 ;
 }
 
 #toggle-dark-mode:hover {
@@ -137,7 +135,7 @@ body {
     left: -250px; /* Panel oculto por defecto */
     width: 250px;
     height: 100%;
-    background-color: #570456;
+    background-color: #8BABF1;
     color: white;
     transition: left 0.3s ease;
     padding: 20px;
@@ -221,10 +219,7 @@ body {
     text-align: center;
     cursor: pointer;
     transition: background-color 0.3s ease;
-
     border: 1px solid #312142 ;
-    
-    
 }
 
 .control-button:hover {
@@ -233,8 +228,6 @@ body {
     transition: background-color 0.3s, border-color 0.3s;
     box-shadow: 2px 0 5px  #312142 ;
 }
-
-
 
 /* Botón de Despliegue del Panel */
 #panel-toggle {
@@ -251,7 +244,6 @@ body {
     z-index: 1001;
     transition: background-color 0.3s ease;
     border: 1px solid #312142 ;
-    
 }
 
 #panel-toggle:hover {
@@ -261,25 +253,24 @@ body {
 }
 
 /* Estilos para el modo oscuro */
-.dark-mode body {
-    background-color: #181818;
+.dark-mode {
+    background-color: #1E1E1E;
     color: #e5e5e5;
 }
 
 .dark-mode .container {
-    background: #570456;
-    border-color: #444;
+    background: #2e002d;
+    border-color: #110011;
 }
 
 .dark-mode #chat {
-    background: #6A0153;
+    background: #570456;
     border-color: #6A0153;
 }
 
 .dark-mode .user-message {
     background-color:#e74b02d8;
     color: #fff;
-    
 }
 
 .dark-mode .response-message {
@@ -288,7 +279,7 @@ body {
 }
 
 .dark-mode #input-container {
-    background: #570456;
+    background: #2e002d;
     border-top: 1px solid #585858;
 }
 
@@ -343,4 +334,8 @@ body {
     background-color: #a52727; 
 }
 
-
+.dark-mode #control-panel {
+    background-color: #2e002d; 
+    color: #e5e5e5; 
+    border-color: #444; 
+}

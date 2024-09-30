@@ -1,41 +1,45 @@
-
 body {
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #f5f5f5;
+    background-color: #bfc9df; /* Fondo claro */
     margin: 0;
+    transition: background-color 0.3s, color 0.3s;
 }
 
 form {
-    background-color: #fff;
+    background-color: #8babf1; /* Fondo del formulario */
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     padding: 20px;
     text-align: center;
-    max-width: 500px; 
+    max-width: 500px;
     width: 100%;
+    border: 1px solid #555555; /* Borde del formulario */
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .control-button {
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
+    background-color: #cf8341; /* Botón en modo claro */
+    border: 1px solid #312142;
+    border-radius: 8px;
     color: #fff;
     cursor: pointer;
     font-size: 16px;
     padding: 10px 20px;
     margin: 10px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .control-button:hover {
-    background-color: #0056b3;
+    background-color: #d17423; /* Hover */
+    border: 1px solid #312142;
+    box-shadow: 1px 0 3px #312142;
 }
 
 .control-button:active {
-    background-color: #004494;
+    background-color: #a52727;
 }
 
 #fileInput {
@@ -50,6 +54,7 @@ form {
 #fileListTitle {
     font-weight: bold;
     margin-bottom: 10px;
+    color: #312142; /* Texto del título */
 }
 
 #fileList {
@@ -59,9 +64,42 @@ form {
 }
 
 #fileList li {
-    background: #f0f0f0;
-    border: 1px solid #ddd;
-    border-radius: 4px;
+    background: #d9e4ff; /* Fondo de la lista de archivos */
+    border: 1px solid #555555;
+    border-radius: 8px;
     padding: 10px;
     margin: 5px 0;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+/* Estilos para el modo oscuro */
+.dark-mode body {
+    background-color: #1E1E1E;
+}
+
+.dark-mode form {
+    background-color: #2e002d; /* Fondo del formulario en modo oscuro */
+    border-color: #110011;
+}
+
+.dark-mode .control-button {
+    background-color: #e74b02d8;
+    border-color: #312142;
+}
+
+.dark-mode .control-button:hover {
+    background-color: #a52727;
+}
+
+.dark-mode .control-button:active {
+    background-color: #a52727;
+}
+
+.dark-mode #fileListTitle {
+    color: #e5e5e5; /* Texto en modo oscuro */
+}
+
+.dark-mode #fileList li {
+    background: #570456; /* Fondo de la lista de archivos en modo oscuro */
+    border-color: #6A0153;
 }
