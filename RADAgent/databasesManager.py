@@ -47,31 +47,23 @@ class DatabasesManager:
             Raises:
                 ValueError: If the container path does not exist or if a database with the same name already exists.
         """
+        try:
             
-        if (not (os.path.exists(container_path))): 
-            raise ValueError("Folder does not exist")
+            if (not (os.path.exists(container_path))): 
+                raise ValueError("Folder does not exist")
+            
+            files = os.listdir(self.route)
+            
+            if database_name in files: 
+                raise ValueError("Database already exists")
+
+            split_documents = self._prepare_data(container_path)
+            
+            self._save_embeddings(database_name=database_name, split_documents=split_documents)
+            
+        except Exception as e:
+            self.status_database.update_entry_status(database_id=database_name, new_status=StatusEnum.error)
         
-        files = os.listdir(self.route)
-        if database_name in files: 
-            raise ValueError("Database already exists")
-                
-        
-        split_documents = self._prepare_data(container_path)
-        
-        '''
-        for doc in split_documents:
-            print(f"File: {doc.metadata['file']}, Página: {doc.metadata['page_number']}, Chunk: {doc.page_content[:100]}...")
-        '''
-        ##Synchronous wait 
-        self._save_embeddings(database_name=database_name, split_documents=split_documents)
-        
-        '''
-        docs = self.retrieval_augmented(database_name=database_name,query_text="Se usa unity o unreal engine y para que? ")
-   
-        for doc in docs:
-            print(doc.page_content)
-            print()
-        '''
           
         
     def _prepare_data(self, container_path): 
@@ -198,18 +190,23 @@ class DatabasesManager:
         
         path = os.path.join(self.route, database_name)    
         
-        database_status = self.status_database.get_database_status(database_id=database_name)
+        try:
+            database_status = self.status_database.get_database_status(database_id=database_name)
         
-        if (database_status != StatusEnum.ready):
-            return None     
+            if (database_status != StatusEnum.ready):
+                return None     
+            
+            vector_store_loaded = Chroma(persist_directory=path, embedding_function=self.embedding_model)
+            
+            retriever = vector_store_loaded.as_retriever(search_type="similarity", search_kwargs={"k": top_k})
+            
+            retrieved_docs = retriever.invoke(query_text)
+            
+            return retrieved_docs
         
-        vector_store_loaded = Chroma(persist_directory=path, embedding_function=self.embedding_model)
-        
-        retriever = vector_store_loaded.as_retriever(search_type="similarity", search_kwargs={"k": top_k})
-        
-        retrieved_docs = retriever.invoke(query_text)
-        
-        return retrieved_docs
+        except Exception as e:
+            raise RuntimeError("Error: cannot get context from {}. Original error: {}".format(database_name, e))
+    
 
         
         

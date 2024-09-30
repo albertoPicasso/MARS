@@ -40,6 +40,7 @@ body {
     border-radius: 8px;
     background:  #d9e4ff ;
     transition: background-color 0.3s, border-color 0.3s;
+    white-space: pre-wrap; 
 }
 
 .message {
@@ -49,6 +50,7 @@ body {
     border-bottom: 1px solid #ccc; 
     background: rgba(255, 255, 255, 0.8); 
     line-height: 1.5;
+    white-space: pre-wrap; 
 }
 
 .user-message {
@@ -58,6 +60,7 @@ body {
     border: 1px solid #312142 ;
     transition: background-color 0.3s, border-color 0.3s;
     box-shadow: 1px 0 3px  #312142 ;
+    white-space: pre-wrap; 
 }
 
 .response-message {
@@ -66,6 +69,7 @@ body {
     border: 1px solid #312142 ;
     transition: background-color 0.3s, border-color 0.3s;
     box-shadow: 1px 0 3px  #312142 ;
+    white-space: pre-wrap; 
 }
 
 #input-container {

@@ -67,7 +67,7 @@ inputMessage.addEventListener('keypress', (event) => {
 function addMessageToChat(className, message) {
     const messageElement = document.createElement('div');
     messageElement.className = `message ${className}`;
-    messageElement.textContent = message;
+    messageElement.innerHTML = message.replace(/\n/g, '<br>');
     chat.appendChild(messageElement);
     chat.scrollTop = chat.scrollHeight;
 }

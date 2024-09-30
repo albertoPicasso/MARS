@@ -131,52 +131,62 @@ class ViewAgent:
         return render_template('close_windows.html')
 
     def send_message(self):
-        endpoint = "/processMessage"
-        URL = f"{self.controlAgentIP}{endpoint}"
-        
-        user_message = request.json.get('message')
-        currentDB = request.json.get('currentDB')
-        
-        self.messages[currentDB].append({'type': 'HumanMessage', 'text': user_message})
-        
-        ''' 
-        Steps: 
-            1- Create a Json contains al messages
-            2- Cypher Json with Cyphertext
-            3- Send to control and wait response
-            4- Add response to database
-            5- return response to js file     
-        '''
-        json_chat = self.get_messages_as_json(currentDB)
-        
-        
-        data = {
-            "user":self.user,
-            "pass":self.passcode,
-            "chat":json_chat, 
-            "database":currentDB
-        }
-        json_data = json.dumps(data)
-        
-        cipherData = CryptoManager.encrypt_text(json_data, self.passForCipher)
-        data_to_send = {"cipherData": cipherData}
-        
-        generation = requests.post(URL, json=data_to_send)
-        
-        if generation.status_code == 200:
-            data = generation.json()  
-            ciphered_generation = data['cipher_response'] 
-            generation_json = CryptoManager.decrypt_text(ciphered_generation, self.passForCipher)
-            generation = json.loads(generation_json)
-            text = generation["generation"]
+        try: 
+            endpoint = "/processMessage"
+            URL = f"{self.controlAgentIP}{endpoint}"
             
-        
-        response_message = text 
-        
-        self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})
-        
-        return jsonify({'response': response_message})
+            user_message = request.json.get('message')
+            currentDB = request.json.get('currentDB')
+            
+            self.messages[currentDB].append({'type': 'HumanMessage', 'text': user_message})
+            
+            ''' 
+            Steps: 
+                1- Create a Json contains al messages
+                2- Cypher Json with Cyphertext
+                3- Send to control and wait response
+                4- Add response to database
+                5- return response to js file     
+            '''
+            json_chat = self.get_messages_as_json(currentDB)
+            
+            
+            data = {
+                "user":self.user,
+                "pass":self.passcode,
+                "chat":json_chat, 
+                "database":currentDB
+            }
+            json_data = json.dumps(data)
+            
+            cipherData = CryptoManager.encrypt_text(json_data, self.passForCipher)
+            data_to_send = {"cipherData": cipherData}
+            
+            generation = requests.post(URL, json=data_to_send)
+            
+            if generation.status_code == 200:
+                data = generation.json()  
+                ciphered_generation = data['cipher_response'] 
+                generation_json = CryptoManager.decrypt_text(ciphered_generation, self.passForCipher)
+                generation = json.loads(generation_json)
+                text = generation["generation"]
+                response_message = self.parse_message(text) 
+                
+                self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})
+                return jsonify({'response': response_message}), 200
+            else:
+                response_message = "Internal error please refresh website :(.\n If it doest work please check Agent Satus"
+                response_message = self.parse_message(response_message)
+                self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})
+                return jsonify({'response': response_message}), 500
 
+            
+            
+        except Exception as e: 
+            response_message = "Internal error please refresh website :(. If it doest work please check Agent Satus"
+            response_message = self.parse_message(response_message)
+            self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})
+            return jsonify({'response': response_message}), 500
 
     
     def clear_messages(self):
@@ -187,6 +197,11 @@ class ViewAgent:
         return jsonify({'status': 'Messages cleared successfully'})
 
     #Aux function
+    def parse_message(self, message):
+    # Reemplaza los saltos de línea por <br>
+        return message.replace('\n', '<br>')
+    
+    
     def empty_directory(self, path):
         """Empty a directory of all its contents without deleting the directory itself."""
         if os.path.exists(path):

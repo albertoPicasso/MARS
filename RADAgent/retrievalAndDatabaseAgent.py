@@ -25,170 +25,300 @@ class retrievalAndDatabaseAgent:
          
     def create_vector_database(self):
         """
-        Creates a new vector database from the provided encrypted PDF content.
+        Create a vector database from uploaded files.
 
-        This function processes a request to create a vector database by:
-            1. Extracting `elementNames` and `content` from the incoming JSON request.
-            2. Validating that all required fields are present; returns a 400 error if any are missing.
-            3. Decrypting the provided encrypted PDF content and saving the resulting files to a temporary directory.
-            4. Calling `self.database_manager.create_database` to create the vector database using the saved files.
-            5. Returning a response containing the `database_id` corresponding to the newly created database.
+        This endpoint receives encrypted data in the `cipherData` field, which contains a list of files 
+        to be processed and stored in a new vector database. The expected structure of the decrypted JSON 
+        is as follows:
 
-        Process:
-            - Extracts `elementNames` and `content` from the JSON request.
-            - Validates the presence of required fields and handles missing fields by returning an error response.
-            - Decrypts the PDF files and saves them in a uniquely named temporary directory.
-            - Updates the status of the database entry to indicate that it is in the processing stage.
-            - Creates the vector database in a separate thread for asynchronous processing.
+        - `files`: List of files to be uploaded (array of strings, where each string is a file name).
 
-        Returns:
-            Response: A JSON response indicating the status of the database creation.
-                    - 200 OK with `database_id` if the creation is successful.
-                    - 400 Bad Request if required fields are missing.
+        The function decrypts the `cipherData`, verifies the presence of required fields, creates a new folder 
+        for the files, and saves the uploaded files. It then starts a background thread to create the database 
+        while immediately responding with the unique database identifier. If any required fields are missing, 
+        an error message is returned.
 
-        Request JSON Structure:
-            {
-                "elementNames": str,        # Names of the elements/files, separated by '#'
-                "content": str              # Encrypted PDF content, separated by newlines
-            }
+        ---
+        parameters:
+        - name: cipherData
+            in: body
+            required: true
+            description: Encrypted JSON string that contains a list of files to be processed.
+            schema:
+            type: object
+            properties:
+                cipherData:
+                type: string
+                description: The encrypted data representing the list of files.
 
-        Notes:
-            - The temporary folder for storing decrypted files is created in the 'RA&DAgent' directory.
-            - The PDF files are decrypted using `CryptoManager.decrypt_pdf` before being processed by the database manager.
-            - A unique folder name is generated for each new database creation process to avoid conflicts.
+        responses:
+        200:
+            description: Vector database creation initiated successfully.
+            schema:
+            type: object
+            properties:
+                cipherData:
+                type: string
+                description: The encrypted identifier for the new database.
+        400:
+            description: Missing required fields in the JSON request.
+            schema:
+            type: object
+            properties:
+                error:
+                type: string
+                example: "Faltan argumentos en el JSON"
+                missing_fields:
+                type: array
+                items:
+                    type: string
+        500:
+            description: Internal server error occurred during processing.
+            schema:
+            type: object
+            properties:
+                message:
+                type: string
+                example: "Error in RAD Agent"
         """
-        
-        encrypted_data = request.get_json()
+       
+        try:
+            encrypted_data = request.get_json()
 
-        if isinstance(encrypted_data, str):
-            encrypted_data = json.loads(encrypted_data)
+            if isinstance(encrypted_data, str):
+                encrypted_data = json.loads(encrypted_data)
 
-        cipher_text = encrypted_data.get('cipherData')
-        decrypted_data = CryptoManager.decrypt_text(cipher_text)
-        data = json.loads(decrypted_data)
-        
-        required_fields = ['files']
-        missing_fields = [field for field in required_fields if data.get(field) is None]
-
-        if missing_fields:
-            return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
-
-        files = data ["files"]
-        
-        folder_name = str(uuid.uuid4())
-        folder_path = os.path.join("RA&DAgent", folder_name)
-        os.makedirs(folder_path)
-        
-        self.save_pdfs(container=folder_path, files=files)
+            cipher_text = encrypted_data.get('cipherData')
+            decrypted_data = CryptoManager.decrypt_text(cipher_text)
+            data = json.loads(decrypted_data)
             
-        self.status_database.add_entry(database_id=folder_name, status_value=StatusEnum.processing)
-        #Create a thread to this func
-        thread = threading.Thread(target=self.database_manager.create_database, args=(folder_path, folder_name))
-        thread.start()
+            required_fields = ['files']
+            missing_fields = [field for field in required_fields if data.get(field) is None]
+
+            if missing_fields:
+                return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
+
+            files = data ["files"]
+            
+            folder_name = str(uuid.uuid4())
+            folder_path = os.path.join("RA&DAgent", folder_name)
+            os.makedirs(folder_path)
+            
+            self._save_pdfs(container=folder_path, files=files)
+                
+            self.status_database.add_entry(database_id=folder_name, status_value=StatusEnum.processing)
+            thread = threading.Thread(target=self.database_manager.create_database, args=(folder_path, folder_name))
+            thread.start()
+            
+            data = {
+                "database_id": folder_name
+            }
+            
+            json_data = json.dumps(data)
+            
+            cipherData = CryptoManager.encrypt_text(json_data)
+            data_to_send = {"cipherData": cipherData}
+            
+            response = data_to_send, 200
+            return response
         
-        data = {
-            "database_id": folder_name
-        }
-        
-        json_data = json.dumps(data)
-        
-        cipherData = CryptoManager.encrypt_text(json_data)
-        data_to_send = {"cipherData": cipherData}
-        
-        response = data_to_send, 200
-        return response
+        except Exception as e: 
+            return jsonify({"message": "Error in RAD Agent"}), 500    
     
     
     def delete_vector_database(self): 
         """
-        Deletes a vector database entry by updating its status to 'deleted'.
+        Delete a vector database based on the provided database identifier.
 
-        This function processes a request to delete a database by:
-            1. Extracting the encrypted database ID from the incoming JSON request.
-            2. Decrypting the encrypted database ID to get the actual database ID.
-            3. Updating the status of the database entry in the local database to 'deleted'.
-            4. Responding with a success message if the operation is successful.
+        This endpoint receives encrypted data in the `cipherData` field, which contains the identifier 
+        for the vector database to be deleted. The expected structure of the decrypted JSON is as follows:
 
-        Args:
-            None: This function extracts all necessary information from the incoming request's JSON payload.
+        - `database_id`: Identifier for the database to be deleted (string).
 
-        Process:
-            1. Extracts `encrypted_database_id` from the JSON request.
-            2. Decrypts `encrypted_database_id` using `CryptoManager.decrypt_text()` to obtain the actual `database_id`.
-            3. Updates the status of the database entry in the local database to `deleted` by calling `self.status_database.update_entry_status()`.
-            4. Returns a JSON response indicating success.
+        The function decrypts the `cipherData`, verifies the presence of required fields, updates the status 
+        of the specified database to "deleted", and returns a success message. If any required fields are 
+        missing, an error message is returned.
 
-        Returns:
-            Response: A JSON response with a 200 OK status indicating that the database deletion was processed.
+        ---
+        parameters:
+        - name: cipherData
+            in: body
+            required: true
+            description: Encrypted JSON string that contains the database identifier.
+            schema:
+            type: object
+            properties:
+                cipherData:
+                type: string
+                description: The encrypted data representing the database identifier.
+
+        responses:
+        200:
+            description: Database deletion initiated successfully.
+            schema:
+            type: object
+            properties:
+                OK:
+                type: string
+                example: "OK"
+        400:
+            description: Missing required fields in the JSON request.
+            schema:
+            type: object
+            properties:
+                error:
+                type: string
+                example: "Faltan argumentos en el JSON"
+                missing_fields:
+                type: array
+                items:
+                    type: string
+        500:
+            description: Internal server error occurred during processing.
+            schema:
+            type: object
+            properties:
+                message:
+                type: string
+                example: "Error in RAD Agent"
         """
-        encrypted_data = request.get_json()
+        try: 
+            encrypted_data = request.get_json()
 
-        if isinstance(encrypted_data, str):
-            encrypted_data = json.loads(encrypted_data)
+            if isinstance(encrypted_data, str):
+                encrypted_data = json.loads(encrypted_data)
 
-        cipher_text = encrypted_data.get('cipherData')
-        decrypted_data = CryptoManager.decrypt_text(cipher_text)
-        data = json.loads(decrypted_data)
-        database_id = data["database_id"]
-        
-        self.status_database.update_entry_status(database_id=database_id, new_status=StatusEnum.deleted)
-        
-        response = make_response(jsonify({"OK": "OK"}), 200)
+            cipher_text = encrypted_data.get('cipherData')
+            decrypted_data = CryptoManager.decrypt_text(cipher_text)
+            data = json.loads(decrypted_data)
             
-        return response
+            required_fields = ['database_id', ]
+            missing_fields = [field for field in required_fields if data.get(field) is None]
+
+            if missing_fields:
+                return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
+
+            database_id = data["database_id"]
+            
+            self.status_database.update_entry_status(database_id=database_id, new_status=StatusEnum.deleted)
+            
+            response = make_response(jsonify({"OK": "OK"}), 200)
+                
+            return response
     
+        except Exception as e: 
+            return jsonify({"message": "Error in RAD Agent"}), 500  
     
     def get_retrieval_context(self):
         """
-        Retrieves the retrieval context based on encrypted input data.
+        Retrieve context for a given message from a specified database.
 
-        This function processes a JSON request containing encrypted data. It decrypts the 
-        cipher text to extract the last message and the database identifier. It then checks 
-        the status of the specified database to determine if it is ready for retrieval. If the 
-        database is in a state that is not ready, it responds with an appropriate error message. 
-        If the database is ready, it retrieves the relevant documents from the database context, 
-        encrypts this context, and returns it in the response.
+        This endpoint receives encrypted data in the `cipherData` field, which contains the last message 
+        to be processed and the identifier for the database from which to retrieve context. The expected 
+        structure of the decrypted JSON is as follows:
 
-        Returns:
-            Response: A Flask response object containing either:
-                - A JSON object with the encrypted context under the key "cipherData" if 
-                the operation is successful.
-                - An error message in JSON format if the database status is not ready.
+        - `last_message`: The last message from the user (string).
+        - `database`: Identifier for the database from which to retrieve context (string).
 
-        Raises:
-            ValueError: If the decrypted data does not contain expected fields.
+        The function decrypts the `cipherData`, verifies the presence of required fields, checks the status 
+        of the specified database, and retrieves the relevant context if the database is ready. If the 
+        database is either deleted or still processing, an appropriate error message is returned. Finally, 
+        the context is encrypted and sent back in the response.
+
+        ---
+        parameters:
+        - name: cipherData
+            in: body
+            required: true
+            description: Encrypted JSON string that contains the last message and database identifier.
+            schema:
+            type: object
+            properties:
+                cipherData:
+                type: string
+                description: The encrypted data representing the last message and database identifier.
+
+        responses:
+        200:
+            description: Context retrieved successfully.
+            schema:
+            type: object
+            properties:
+                cipherData:
+                type: string
+                description: The encrypted context data retrieved from the database.
+        400:
+            description: Missing required fields in the JSON request.
+            schema:
+            type: object
+            properties:
+                error:
+                type: string
+                example: "Faltan argumentos en el JSON"
+                missing_fields:
+                type: array
+                items:
+                    type: string
+        503:
+            description: The database is either deleted or still processing.
+            schema:
+            type: object
+            properties:
+                Error:
+                type: string
+                example: "Deleted Database" or "Processing Database"
+        500:
+            description: Internal server error occurred during processing.
+            schema:
+            type: object
+            properties:
+                message:
+                type: string
+                example: "Error in RAD Agent"
         """
-    
-        encrypted_data = request.get_json()
+        try: 
+            encrypted_data = request.get_json()
 
-        if isinstance(encrypted_data, str):
-            encrypted_data = json.loads(encrypted_data)
+            if isinstance(encrypted_data, str):
+                encrypted_data = json.loads(encrypted_data)
 
-        cipher_text = encrypted_data.get('cipherData')
-        decrypted_data = CryptoManager.decrypt_text(cipher_text)
-        
-        data = json.loads(decrypted_data)
-        
-        message = data.get('last_message')
-        database = data.get('database')
-        
-        database_status = self.status_database.get_database_status(database_id=database)
-        
-        if (database_status != StatusEnum.ready):
-            if (database_status != StatusEnum.deleted):
-                response = make_response(jsonify({"Error": "Deleted Database"}), 503)
-            if (database_status != StatusEnum.processing):
-                response = make_response(jsonify({"Error": "Processing Database"}), 503)
+            cipher_text = encrypted_data.get('cipherData')
+            decrypted_data = CryptoManager.decrypt_text(cipher_text)
+            
+            data = json.loads(decrypted_data)
+            
+            required_fields = ['last_message' ,'database']
+            missing_fields = [field for field in required_fields if data.get(field) is None]
+
+            if missing_fields:
+                return jsonify({"error": "Faltan argumentos en el JSON", "missing_fields": missing_fields}), 400
+
+            message = data.get('last_message')
+            database = data.get('database')
+            
+            database_status = self.status_database.get_database_status(database_id=database)
+            
+            if (database_status != StatusEnum.ready):
+                if (database_status != StatusEnum.deleted):
+                    response = make_response(jsonify({"Error": "Deleted Database"}), 503)
+                if (database_status != StatusEnum.processing):
+                    response = make_response(jsonify({"Error": "Processing Database"}), 503)
+                return response
+            
+            context = self.database_manager.get_context(database_name=database, query_text=message)
+            context_json = json.dumps([{"page_content": doc.page_content, "metadata": doc.metadata} for doc in context])
+            cipherData = CryptoManager.encrypt_text(context_json)
+            response = make_response(jsonify({"cipherData": cipherData}), 200)
             return response
         
-        context = self.database_manager.get_context(database_name=database, query_text=message)
-        context_json = json.dumps([{"page_content": doc.page_content, "metadata": doc.metadata} for doc in context])
-        cipherData = CryptoManager.encrypt_text(context_json)
-        response = make_response(jsonify({"cipherData": cipherData}), 200)
-        return response
+        except Exception as e: 
+            return jsonify({"message": "Error in RAD Agent"}), 500
     
     
-    def save_pdfs(self, container, files):
+    
+    ##Aux funcions
+    
+    def _save_pdfs(self, container, files):
        
         for file in files:
             file_name = file.get('title')
