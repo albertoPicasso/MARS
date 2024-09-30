@@ -1,4 +1,5 @@
 function openUploadWindow(dbName) {
-    const url = `/uploadFile?db=${dbName}`;
+    const isDarkMode = document.body.classList.contains('dark-mode');
+    const url = `/uploadFile?db=${dbName}&darkMode=${isDarkMode}`;
     window.open(url, '_blank');
 }

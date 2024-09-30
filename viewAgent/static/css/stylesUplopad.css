@@ -73,6 +73,11 @@ form {
 }
 
 /* Estilos para el modo oscuro */
+.dark-mode {
+    background-color: #1E1E1E;
+    color: #e5e5e5;
+}
+
 .dark-mode body {
     background-color: #1E1E1E;
 }

@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subir Archivos</title>
+    <title>MARS - create database</title>
+    <link rel="icon" href="{{ url_for('static', filename='images/mars.jpg') }}" type="image/jpg"> 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/stylesUplopad.css') }}">
     <script src="{{ url_for('static', filename='js/uploadFile.js') }}" defer></script>
 </head>
@@ -20,7 +20,20 @@
             <ul id="fileList"></ul>
         </div>
     </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Obtener el estado del modo oscuro de los parámetros de la URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const darkMode = urlParams.get('darkMode') === 'true';
+
+            // Aplicar el modo oscuro si es necesario
+            if (darkMode) {
+                document.body.classList.add('dark-mode');
+            } else {
+                document.body.classList.remove('dark-mode');
+            }
+        });
+    </script>
 </body>
 </html>
-
-
