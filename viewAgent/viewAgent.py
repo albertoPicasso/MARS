@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
+from configClasses.controlConfig import ControlConfig
 from cryptoManager import CryptoManager
 import os
 import requests
@@ -13,7 +14,6 @@ class ViewAgent:
         self.app = Flask(__name__)
         self.configure_upload_folder()
         self.setup_routes()
-        self.read_agents_config()
         self.database = "aaa" 
         self.messages = {
             'db1':[],
@@ -21,6 +21,7 @@ class ViewAgent:
             'db3':[],
             }
         self.utils = Utils()
+        self.controlConfig = ControlConfig()
         
     def configure_upload_folder(self):
         self.UPLOAD_FOLDER = 'viewAgent/uploads/'
@@ -40,23 +41,7 @@ class ViewAgent:
         #States control
         self.app.add_url_rule('/clear_messages', 'clear_messages', self.clear_messages, methods=['POST']) 
         
-        
-    def read_agents_config(self):
-        base_dir = os.path.abspath(os.path.dirname(__file__))
-        file_path = os.path.join(base_dir, 'controlAgentInfo.txt')
-        config = dict()
-        
-        with open(file_path, 'r') as file:
-            for line in file:
-                key, value = line.strip().split(':', 1)
-                config[key] = value
-                
-        self.passcode = config.get('password', 'default_passcode')
-        self.controlAgentIP = config.get('ip', 'http://default_ip')
-        self.user = config.get('user', 'default_user')
-        self.passForCipher = config.get('cypherPass', 'default_cypherPass')
 
-         
     ##HTML returns
     def home(self):
         return render_template('index.html')
@@ -91,7 +76,7 @@ class ViewAgent:
                 Documents
         '''
         endpoint = "/createNewDatabase"
-        URL = f"{self.controlAgentIP}{endpoint}"
+        URL = f"{self.controlConfig.ip}{endpoint}"
         
         uploadPath = os.path.join("viewAgent", "uploads")
 
@@ -112,15 +97,15 @@ class ViewAgent:
 
         
         data = {
-            "user":self.user,
-            "pass":self.passcode,
+            "user":self.controlConfig.user,
+            "pass":self.controlConfig.password,
             "database": self.database,
             "files":filesList
         }
 
         json_data = json.dumps(data)
         
-        cipherData = CryptoManager.encrypt_text(json_data, self.passForCipher)
+        cipherData = CryptoManager.encrypt_text(json_data, self.controlConfig.cypherPass)
         data_to_send = {"cipherData": cipherData}
         
         response = requests.post(URL, json=data_to_send)
@@ -134,7 +119,8 @@ class ViewAgent:
     def send_message(self):
         try: 
             endpoint = "/processMessage"
-            URL = f"{self.controlAgentIP}{endpoint}"
+            URL = f"{self.controlConfig.ip}{endpoint}"
+            print (URL)
             
             user_message = request.json.get('message')
             currentDB = request.json.get('currentDB')
@@ -153,14 +139,14 @@ class ViewAgent:
             
             
             data = {
-                "user":self.user,
-                "pass":self.passcode,
+                "user":self.controlConfig.user,
+                "pass":self.controlConfig.password,
                 "chat":json_chat, 
                 "database":currentDB
             }
             json_data = json.dumps(data)
             
-            cipherData = CryptoManager.encrypt_text(json_data, self.passForCipher)
+            cipherData = CryptoManager.encrypt_text(json_data, self.controlConfig.cypherPass)
             data_to_send = {"cipherData": cipherData}
             
             generation = requests.post(URL, json=data_to_send)
@@ -168,7 +154,7 @@ class ViewAgent:
             if generation.status_code == 200:
                 data = generation.json()  
                 ciphered_generation = data['cipher_response'] 
-                generation_json = CryptoManager.decrypt_text(ciphered_generation, self.passForCipher)
+                generation_json = CryptoManager.decrypt_text(ciphered_generation, self.controlConfig.cypherPass)
                 generation = json.loads(generation_json)
                 text = generation["generation"]
                 response_message = self.utils.parse_message(text) 

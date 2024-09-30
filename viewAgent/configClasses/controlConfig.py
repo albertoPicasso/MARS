@@ -15,7 +15,9 @@ class ControlConfig:
                 config[key] = value
                 
         
+        self.user = config.get('user', 'default_user')
+        self.password = config.get('password', 'default_password')
         self.ip = config.get('ip', 'http://default_ip')
         self.cypherPass = config.get('cypherPass', 'default_cypherPass')
         
-        
+

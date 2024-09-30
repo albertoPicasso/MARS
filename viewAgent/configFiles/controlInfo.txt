@@ -1,2 +1,4 @@
+user:al
+password:veryDifficultPass
 ip:http://127.0.0.1:5006
 cypherPass:1234567890abcdef1234567890abcdef
