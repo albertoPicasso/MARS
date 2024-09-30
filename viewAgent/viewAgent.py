@@ -3,8 +3,8 @@ from cryptoManager import CryptoManager
 import os
 import requests
 import json
-from langchain.document_loaders import PyPDFLoader
-from fpdf import FPDF
+from utils import Utils
+
 
 
 class ViewAgent:
@@ -20,6 +20,7 @@ class ViewAgent:
             'db2':[],
             'db3':[],
             }
+        self.utils = Utils()
         
     def configure_upload_folder(self):
         self.UPLOAD_FOLDER = 'viewAgent/uploads/'
@@ -124,7 +125,7 @@ class ViewAgent:
         
         response = requests.post(URL, json=data_to_send)
         delete_path = os.path.join("viewAgent", "uploads")
-        self.empty_directory(delete_path)
+        self.utils.empty_directory(delete_path)
         self.database = "aaa"
         
         #Close uploader tab 
@@ -148,7 +149,7 @@ class ViewAgent:
                 4- Add response to database
                 5- return response to js file     
             '''
-            json_chat = self.get_messages_as_json(currentDB)
+            json_chat = self.utils.get_messages_as_json(currentDB, self.messages)
             
             
             data = {
@@ -170,21 +171,22 @@ class ViewAgent:
                 generation_json = CryptoManager.decrypt_text(ciphered_generation, self.passForCipher)
                 generation = json.loads(generation_json)
                 text = generation["generation"]
-                response_message = self.parse_message(text) 
+                response_message = self.utils.parse_message(text) 
                 
                 self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})
                 return jsonify({'response': response_message}), 200
             else:
                 response_message = "Internal error please refresh website :(.\n If it doest work please check Agent Satus"
-                response_message = self.parse_message(response_message)
+                response_message = self.utils.parse_message(response_message)
                 self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})
                 return jsonify({'response': response_message}), 500
 
             
             
         except Exception as e: 
+            print (e)
             response_message = "Internal error please refresh website :(. If it doest work please check Agent Satus"
-            response_message = self.parse_message(response_message)
+            response_message = self.utils.parse_message(response_message)
             self.messages[currentDB].append({'type': 'AIMessage', 'text': response_message})
             return jsonify({'response': response_message}), 500
 
@@ -196,33 +198,6 @@ class ViewAgent:
         
         return jsonify({'status': 'Messages cleared successfully'})
 
-    #Aux function
-    def parse_message(self, message):
-    # Reemplaza los saltos de línea por <br>
-        return message.replace('\n', '<br>')
-    
-    
-    def empty_directory(self, path):
-        """Empty a directory of all its contents without deleting the directory itself."""
-        if os.path.exists(path):
-            if os.path.isdir(path):
-                for item in os.listdir(path):
-                    item_path = os.path.join(path, item)
-                    if os.path.isdir(item_path):
-                        self.empty_directory(item_path)
-                        os.rmdir(item_path)
-                    else:
-                        os.remove(item_path)
-            
-            
-    def get_messages_as_json(self, db):
-        if db in self.messages:
-            db_json = json.dumps(self.messages[db])
-            return db_json
-        else:
-            print(f"Database {db} not found!")
-            return None
-        
 
     def run(self):
         self.app.run(port=5005, debug=True)

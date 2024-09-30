@@ -3,6 +3,7 @@ from statusDatabaseManager import StatusEnum, StatusDatabaseManager
 from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response
 from cryptoManager import CryptoManager
 from databasesManager import DatabasesManager
+from utils import Utils
 
 import os 
 import uuid
@@ -16,6 +17,7 @@ class retrievalAndDatabaseAgent:
         self.setup_routes()
         self.database_manager = DatabasesManager()
         self.status_database = StatusDatabaseManager()
+        self.utils = Utils()
         
     
     def setup_routes(self):
@@ -104,7 +106,7 @@ class retrievalAndDatabaseAgent:
             folder_path = os.path.join("RA&DAgent", folder_name)
             os.makedirs(folder_path)
             
-            self._save_pdfs(container=folder_path, files=files)
+            self.utils.save_pdfs(container=folder_path, files=files)
                 
             self.status_database.add_entry(database_id=folder_name, status_value=StatusEnum.processing)
             thread = threading.Thread(target=self.database_manager.create_database, args=(folder_path, folder_name))
@@ -313,23 +315,6 @@ class retrievalAndDatabaseAgent:
         
         except Exception as e: 
             return jsonify({"message": "Error in RAD Agent"}), 500
-    
-    
-    
-    ##Aux funcions
-    
-    def _save_pdfs(self, container, files):
-       
-        for file in files:
-            file_name = file.get('title')
-            
-            pdf_bytes = bytes.fromhex(file.get('content'))
-            
-            file_path = os.path.join(container, file_name)
-            
-            with open(file_path, 'wb') as pdf_file:
-                pdf_file.write(pdf_bytes)
-
     
     
     def run(self):

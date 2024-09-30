@@ -3,6 +3,7 @@ from databaseManager import DatabaseManager
 from cryptoManager import CryptoManager
 from configClasses.radConfig import RadConfig
 from configClasses.generationConfig import GenerationConfig
+from utils import Utils
 import uuid
 import os 
 import requests
@@ -16,7 +17,8 @@ class ControlAgent:
         self.DBusers = DatabaseManager()
         self.radConfig = RadConfig()
         self.generationConfig = GenerationConfig()
-        #self.DBusers.show_database()
+        self.utils = Utils()
+        
         
     def setup_routes(self):
         self.app.add_url_rule('/createNewDatabase', 'createNewDatabase', self.createNewDatabase, methods=['POST'])
@@ -122,7 +124,7 @@ class ControlAgent:
             folder_path = os.path.join("controlAgent", folder_name)
             os.makedirs(folder_path)
             
-            self.save_pdfs(container=folder_path, files=files)
+            self.utils.save_pdfs(container=folder_path, files=files)
             
             endpoint = "/createvectordatabase"
             URL = f"{self.radConfig.ip}{endpoint}"
@@ -165,13 +167,13 @@ class ControlAgent:
                 database_id = data["database_id"]
                 
                 #if slot already have a database delete it to avoid leftovers
-                database_number = self.get_database_number(database_slot)
+                database_number = self.utils.get_database_number(database_slot)
                 has_assigned = self.DBusers.has_assigned_db(user, database_number)
                 if (has_assigned):
                     self._delete_database(user=user, database_number=database_number)
                     
                 self.DBusers.update_databaseID(username=user, database_number=database_number, new_databaseID=database_id)
-                self.delete_directory(folder_path)
+                self.utils.delete_directory(folder_path)
                 
                 #No cipher content bc only need to check status code
                 response = make_response(jsonify({"Status": "ok"}), 200)
@@ -310,7 +312,7 @@ class ControlAgent:
             password = data.get('pass')
             chat = data.get("chat")
             database_slot = data.get("database")
-            database_slot_number = self.get_database_number(database_slot)
+            database_slot_number = self.utils.get_database_number(database_slot)
                 
             result = self.DBusers.verify_user(user, password)
             
@@ -379,49 +381,6 @@ class ControlAgent:
             return jsonify({"message": "Error in Control Agent"}), 500    
          
          
-         
-         
-         
-         
-            
-    #Aux functions
-    def delete_directory(self, path):
-        if os.path.exists(path):            
-            if os.path.isdir(path):
-                for item in os.listdir(path):
-                    item_path = os.path.join(path, item)
-                    if os.path.isdir(item_path):
-                        self.delete_directory(item_path)
-                    else:
-                        os.remove(item_path)
-                os.rmdir(path) 
-    
-    
-    def get_database_number(self, database_string:str): 
-        match database_string: 
-            case "db1":
-                return 1
-            case "db2":
-                return 2
-            case "db3":
-                return 3
-            case _: 
-                return -1
-            
-
-    def save_pdfs(self, container, files):
-       
-        for file in files:
-            file_name = file.get('title')
-            
-            pdf_bytes = bytes.fromhex(file.get('content'))
-            
-            file_path = os.path.join(container, file_name)
-            
-            with open(file_path, 'wb') as pdf_file:
-                pdf_file.write(pdf_bytes)
-
-        
     
             
     def run(self):
