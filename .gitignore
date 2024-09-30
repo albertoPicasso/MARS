@@ -2,8 +2,8 @@ database/
 viewAgent/uploads
 controlAgent/users.db
 controlAgent/__pycache__
-RA&DAgent/databases
-RA&DAgent/__pycache__
-RA&DAgent/status_database.db
+RADAgent/databases
+RADAgent/__pycache__
+RADAgent/status_database.db
 generationAgent/__pycache__
 generationAgent/apiFile.txt

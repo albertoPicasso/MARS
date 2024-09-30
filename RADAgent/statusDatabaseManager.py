@@ -13,7 +13,7 @@ class Databases(Model):
     status = CharField(choices=[(status.value, status.value) for status in StatusEnum])
 
     class Meta:
-        database = SqliteDatabase('RA&DAgent/status_database.db')  
+        database = SqliteDatabase('RADAgent/status_database.db')  
 
 class StatusDatabaseManager:
     

@@ -160,7 +160,7 @@ class ViewAgent:
         
         cipherData = CryptoManager.encrypt_text(json_data, self.passForCipher)
         data_to_send = {"cipherData": cipherData}
-        return jsonify({'response': "Hola bb"})
+        
         generation = requests.post(URL, json=data_to_send)
         
         if generation.status_code == 200:
