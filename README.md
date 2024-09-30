@@ -64,3 +64,8 @@ The current implementation looks like this:
 <p>Due to the use of the HTTP protocol instead of HTTPS, all messages containing sensitive content are sent encrypted manually in a message with the following format: </p><p><i>{'cipherData': CipherJson}</i></p>
 <p></p>
 <p>All messages use the same function found in the <i>cryptoManager.py</i> file, but with different keys. Whenever a message is sent to an agent, it is encrypted with the recipient's key, and when a response is expected, it is decrypted using the same key that was used for encryption.</p>
+
+<h2>Demo</h2>
+<a href="https://youtu.be/inJnUh2JDbo" target="_blank">
+    <img src="https://img.youtube.com/vi/inJnUh2JDbo/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
+</a>
