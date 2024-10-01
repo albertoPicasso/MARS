@@ -85,6 +85,8 @@ The current implementation looks like this:
 
 <p>Enhance error handling and traceability by utilizing logging.</p><p> </p>
 
+<p>Create a context history to improve response generation. </p><p> </p>
+
 <h2>Technologies used</h2>
 <ul>
   <li>Flask as server</li>
