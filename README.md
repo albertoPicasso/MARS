@@ -83,7 +83,7 @@ The current implementation looks like this:
 <h2>Next steps</h2>
 <p>Create a better way to receive data via JSON by defining schemas for the required data structure using Pydantic, and manage all related data encapsulated within a class instead of using individual variables.</p><p> </p>
 
-<p>Enhance error handling and traceability by utilizing logging.</p><p> </p>
+<p>Enhance error handling and traceability by utilizing bitacoring.</p><p> </p>
 
 <p>Create a context history to improve response generation. </p><p> </p>
 
