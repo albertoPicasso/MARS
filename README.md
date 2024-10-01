@@ -29,10 +29,10 @@
 
 <h2>How to use MARS? </h2>
 <ol>
-  <li>Set up your virtual environment and install the required libraries listed in the requirements.txt file</li>
+  <li>Set up your virtual environment in python 3.10 and install the required libraries listed in the requirements.txt file</li>
   <p> </p>
   
-  <li>Configure the port and interface for each agent.</li>
+  <li>Configure the port and network interface for each agent.</li>
   <p>Flask is used as the server, so modifying the line where these parameters are configured will be sufficient.</p>
   <p><pre><code>
     def run(self):
