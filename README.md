@@ -25,7 +25,7 @@
 <p>It is responsible for creating databases as well as monitoring their status. It handles direct interaction with them, including creating, deleting, and retrieving context from the databases. The agent is designed for a <b> multi user</b>.</p>
 
 <h3>Generation Agent</h3>
-<p>"It is responsible for interacting with the language model to generate responses. The agent is designed for a <b> multi user</b>.</p></p>
+<p>It is responsible for interacting with the language model to generate responses. The agent is designed for a <b> multi user</b>.</p></p>
 
 <h2>How to use MARS? </h2>
 <ol>
