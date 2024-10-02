@@ -99,7 +99,6 @@ class DatabasesManager:
             which allows control over the size of the chunks and overlap between them. The chunk size 
             and overlap are based on the text splitter's configuration, not the page size.
     """
-
         files = os.listdir(container_path)
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
@@ -126,7 +125,6 @@ class DatabasesManager:
                             }
                         )
                     )
-
         return split_documents
     
     
