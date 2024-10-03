@@ -29,13 +29,10 @@
 
 <h2>How to use MARS? </h2>
 <ol>
-  <li>Set up your virtual environment in python 3.10 and install the required libraries listed in the requirements.txt file. 
-  <p>You may need to install pypdf separately because, although it is included in the requirements.txt file, it sometimes doesn't 
-  install correctly</p> 
+  <li>Set up your virtual environment in python 3.10 and install the required libraries listed in the requirements.txt file.  
    </li>
     <p><pre><code>
-    pip install requirements.txt
-    pip install pypdf</i></p></code></pre>
+    pip install requirements.txt</i></p></code></pre>
   <p> </p>
   
   <p> </p>

@@ -10,7 +10,7 @@ import uuid
 import threading
 import json
 
-class retrievalAndDatabaseAgent: 
+class RetrievalAndDatabaseAgent: 
     
     def __init__(self): 
         self.app = Flask(__name__)
@@ -322,6 +322,6 @@ class retrievalAndDatabaseAgent:
         
         
 if __name__ == '__main__':
-    rad = retrievalAndDatabaseAgent()
+    rad = RetrievalAndDatabaseAgent()
     rad.run()
     
