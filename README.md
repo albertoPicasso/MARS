@@ -90,7 +90,7 @@ The current implementation looks like this:
 
 <p>Enhance error handling and traceability by utilizing bitacoring.</p><p> </p>
 
-<p>Create a context history to improve response generation. </p><p> </p>
+<pEnhance the generation agent to enable internet search capabilities. </p><p> </p>
 
 <h2>Technologies used</h2>
 <ul>
