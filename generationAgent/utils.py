@@ -1,10 +1,12 @@
 from langchain.prompts import ChatPromptTemplate
+from langchain.prompts import PromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate, AIMessagePromptTemplate
 from langchain_openai import ChatOpenAI
 
 class Utils: 
         
     def get_promt_template(self) : 
-        rag_prompt_template = ChatPromptTemplate.from_template("""
+        rag_prompt_template = PromptTemplate(
+        template="""
         Contesta a la pregunta en base al contexto proporcionado y el historial de la conversación.
 
         Historial de conversación:
@@ -16,7 +18,14 @@ class Utils:
         ```
 
         Pregunta: {question}
-        """)
+        
+        Al citar, incluye el título y la página de los mensajes de los que obtuviste la información. 
+        Si no es necesario citar, puedes omitirlo. Evita parafrasear de manera que se pierda la flexibilidad del texto original. 
+        Traduce el contexto si es necesario antes de leerlo.
+        """,
+        input_variables=["history", "context", "question"],
+        )
+
         return rag_prompt_template
         
         
@@ -84,4 +93,5 @@ class Utils:
             return api_key
         except Exception as e:
             return None
-
+        
+        

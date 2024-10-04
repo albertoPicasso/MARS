@@ -103,11 +103,11 @@ class RetrievalAndDatabaseAgent:
             files = data ["files"]
             
             folder_name = str(uuid.uuid4())
-            folder_path = os.path.join("RADAgent", folder_name)
+            folder_path = os.path.join("RADAgent",".temp",folder_name)
             os.makedirs(folder_path)
             
             self.utils.save_pdfs(container=folder_path, files=files)
-                
+            
             self.status_database.add_entry(database_id=folder_name, status_value=StatusEnum.processing)
             thread = threading.Thread(target=self.database_manager.create_database, args=(folder_path, folder_name))
             thread.start()

@@ -1,5 +1,6 @@
 from cryptoManager import CryptoManager
-from flask import Flask, request,jsonify, abort, make_response
+from flask import Flask, request,jsonify
+from langchain.prompts import SystemMessagePromptTemplate, ChatPromptTemplate
 import json
 from utils import Utils
 
@@ -87,6 +88,8 @@ class GenerationAgent:
             context_data = data["context"]
             context = json.loads(context_data)
             
+            #Get last six messages
+            messages = messages[-7:] 
             #Get question and history
             question = messages.pop(-1) 
             
@@ -96,17 +99,17 @@ class GenerationAgent:
 
             rag_prompt_template = self.utils.get_promt_template()
         
+            prompt_template = SystemMessagePromptTemplate(prompt=rag_prompt_template)
+            chat_prompt = ChatPromptTemplate.from_messages([prompt_template])         
             
-            prompt = rag_prompt_template.invoke({
-                "context": context_str,
-                "history": history_str,
-                "question": question
-            }).to_messages()
+            chat_promt_value = chat_prompt.format_prompt(
+                history= history_str,
+                context= context_str,
+                question = question
+            ).to_messages()
             
-            
-            response = self.llm.invoke(prompt)
+            response = self.llm(chat_promt_value)
             generation:str = response.content
-            #generation = response
             
             data = {
                 "generation" : generation
