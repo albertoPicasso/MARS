@@ -1,10 +1,30 @@
-from langchain.prompts import ChatPromptTemplate
-from langchain.prompts import PromptTemplate, SystemMessagePromptTemplate, HumanMessagePromptTemplate, ChatPromptTemplate, AIMessagePromptTemplate
+from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
 
+
 class Utils: 
+
+    #LLM Utils
+    def build_LLM(self): 
         
-    def get_promt_template(self) : 
+        api_key = self.get_api_key_from_file()
+         
+        if (not (api_key == None)):
+            llm = ChatOpenAI(model="gpt-4o-mini-2024-07-18",
+                            api_key=api_key)
+            return llm
+        
+    def get_api_key_from_file(self, file="generationAgent/apiFile.txt"):
+        try:
+            with open(file, "r") as f:
+                api_key = f.read().strip()
+            return api_key
+        except Exception as e:
+            return None
+
+    #Prompts utils 
+        
+    def get_context_promt_template(self) : 
         rag_prompt_template = PromptTemplate(
         template="""
         Contesta a la pregunta en base al contexto proporcionado y el historial de la conversación.
@@ -29,8 +49,45 @@ class Utils:
         return rag_prompt_template
         
         
+    def get_knowledge_prompt_template(self):
+        
+        knowledge_prompt_template = PromptTemplate(
+            template="""
+            Responde a la siguiente pregunta basándote únicamente en tu conocimiento general:
 
+            Pregunta: {question}
 
+            Proporcione una respuesta clara y concisa. Si es necesario, incluya ejemplos relevantes o explicaciones adicionales.
+            """,
+            input_variables=["question"],
+        )
+        
+        return knowledge_prompt_template
+    
+    
+    #Zero - shot - classifier
+    def get_zsc_template(self):
+        zero_shot_template = PromptTemplate(
+        template="""
+                Given the following context and message history, classify the user's question into one of the following categories:
+                - "context": If the answer can be derived directly from the context or message history.
+                - "knowledge": If the answer is available from your internal knowledge.
+                - "search": If the answer cannot be derived from either and requires external information.
+
+                Context: {context}
+                Message History: {history}
+                Question: {question}
+
+                Classify the question as "context", "knowledge", or "search".
+                Only return the class
+                """,
+        input_variables=["context", "history", "question"]
+        )
+        
+        return zero_shot_template
+    
+    
+    
     
     
     def format_context(self,context):
@@ -75,23 +132,5 @@ class Utils:
             formatted_messages.append(f"{role}: {message['text']}")
         
         return "\n".join(formatted_messages)
-
-
-    def build_LLM(self): 
-        
-        api_key = self.get_api_key_from_file()
-        
-        if (not (api_key == None)):
-            llm = ChatOpenAI(model="gpt-4o-mini-2024-07-18",
-                            api_key=api_key)
-            return llm
-        
-    def get_api_key_from_file(self, file="generationAgent/apiFile.txt"):
-        try:
-            with open(file, "r") as f:
-                api_key = f.read().strip()
-            return api_key
-        except Exception as e:
-            return None
         
         
