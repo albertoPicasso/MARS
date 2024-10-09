@@ -23,16 +23,19 @@
 
 <h3>Retrieval and Database Agent</h3>
 <p>It is responsible for creating databases as well as monitoring their status. It handles direct interaction with them, including creating, deleting, and retrieving context from the databases. The agent is designed for a <b> multi user</b>.</p>
+<p> </p>
+<p> Chroma as Vector database</p>
 
 <h3>Generation Agent</h3>
-<p>It is responsible for interacting with the language model to generate responses. The agent is designed for a <b> multi user</b>.</p></p>
+<p>It is responsible for interacting with the language model to generate responses. It classifies input text in three different classes an generate a response based on class. Within this agent, two types of agents are combined: conventional multi-agent system agents and language agents from LangChain. This system integrates both the text generation system utilizing LangChain and the web information retrieval system.The agent is designed for a <b> multi user</b>.</p></p>
+<td><img src="images/generationFlow.png" alt="Architecture" width="500"></td>
 
 <h2>How to use MARS? </h2>
 <ol>
   <li>Set up your virtual environment in python 3.10 and install the required libraries listed in the requirements.txt file.  
    </li>
     <p><pre><code>
-    pip install requirements.txt</i></p></code></pre>
+    pip install -r requirements.txt</i></p></code></pre>
   <p> </p>
   
   <p> </p>
@@ -49,8 +52,8 @@
 <p> </p>
 <td><img src="images/configFiles.png" alt="configFiles" width="150"></td>
   
-  <li>Provide the OpenAI key</li>
-  <p>In the <i>Generation Agent</i>, create a file named <i>apiFile.txt</i>, which should contain the OpenAI API key necessary for using the LLM.</p>
+  <li>Provide the necessaries keys </li>
+  <p>In the <i>Generation Agent</i>, create files named <i>configFiles/openAIAPI.txt</i> and <i>configFiles/openAIAPI.txt</i>, which should contain the OpenAI API key necessary for using the LLM and tavily API necessary for using web search, respectively.</p>
 </ol>
 <p> </p>
 <p> </p>
@@ -90,11 +93,5 @@ The current implementation looks like this:
 
 <p>Enhance error handling and traceability by utilizing bitacoring.</p><p> </p>
 
-<pEnhance the generation agent to enable internet search capabilities. </p><p> </p>
+<p>Integrate hallucination detector </p><p> </p>
 
-<h2>Technologies used</h2>
-<ul>
-  <li>Flask as server</li>
-  <li>GPT 4o mini as llm</li>
-  <li>Chroma as Vector Database</li>
-</ul>
