@@ -1,9 +1,8 @@
 from cryptoManager import CryptoManager
 from flask import Flask, request,jsonify
-from langchain.prompts import SystemMessagePromptTemplate, ChatPromptTemplate, PromptTemplate
 import json
 from utils import Utils
-from langchain.chains.llm import LLMChain
+from langchain.schema import Document
 
 
 class GenerationAgent: 
@@ -13,6 +12,9 @@ class GenerationAgent:
         self.setup_routes()
         self.utils = Utils()
         self.llm = self.utils.build_LLM()
+        self.web_search_tool = self.utils.build_web_search_tool()
+        
+
 
         
     def setup_routes(self):
@@ -90,7 +92,8 @@ class GenerationAgent:
             context_data = data["context"]
             context = json.loads(context_data)
             
-            #Get last six messages
+            #Get last six messages 
+            #The unique purpouse of this is save tokens
             messages = messages[-7:] 
             #Get question and history
             question = messages.pop(-1) 
@@ -109,6 +112,12 @@ class GenerationAgent:
                             })
             category = category.content
             
+            aux_category = category.split("*")
+            
+            if len(aux_category) > 1: 
+                category = aux_category[0]
+                web_query = aux_category[1]
+
             #Get response based in text category
             match(category): 
                 case "context":
@@ -132,22 +141,23 @@ class GenerationAgent:
                     generation = generation_AIMessage.content
                                     
                 case "search":
-                    generation = "Web search isn´t implemented yet"
-
-
+                    
+                    docs = self.web_search_tool.invoke({"query": web_query})
+                    web_results = "\n".join([d["content"] for d in docs])
+                    web_results = Document(page_content=web_results)
+                    web_context = web_results.page_content
+                    
+                    context_prompt_template = self.utils.get_web_search_prompt_template()
+                    generation_AIMessage = (context_prompt_template | self.llm).invoke({
+                                            "question": question,
+                                            "context": web_context
+                                            })
+                            
+                    generation = generation_AIMessage.content
+                    
+                case _:
+                    generation = "Text can´t be classified"
             
-            """
-            #Get response from LLM
-            rag_prompt_template = self.utils.get_promt_template()
-            
-            generation_AIMessage = (rag_prompt_template | self.llm).invoke({
-                                "history": history_str,
-                                "context": context_str,
-                                "question": question
-                            })
-            
-            generation = generation_AIMessage.content
-                """
             data = {
                 "generation" : generation
             }
@@ -156,7 +166,6 @@ class GenerationAgent:
             cipher_response = CryptoManager.encrypt_text(json_data)
             return jsonify({"cipher_response": cipher_response}), 200
         except Exception as e: 
-            print (e)
             return jsonify({"message": "Error in RAD Agent"}), 500    
 
 

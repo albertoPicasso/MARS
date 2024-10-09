@@ -1,10 +1,12 @@
 from langchain.prompts import PromptTemplate
 from langchain_openai import ChatOpenAI
+from langchain_community.tools.tavily_search import TavilySearchResults
+import os
 
 
 class Utils: 
 
-    #LLM Utils
+    #Utils
     def build_LLM(self): 
         
         api_key = self.get_api_key_from_file()
@@ -14,7 +16,16 @@ class Utils:
                             api_key=api_key)
             return llm
         
-    def get_api_key_from_file(self, file="generationAgent/apiFile.txt"):
+        
+    def build_web_search_tool(self): 
+        api_key = self.get_api_key_from_file("generationAgent/configFiles/tavilyAPI.txt")
+        
+        if (not (api_key == None)):
+            os.environ["TAVILY_API_KEY"] = api_key
+            return  TavilySearchResults()
+        
+        
+    def get_api_key_from_file(self, file="generationAgent/configFiles/openAIAPI.txt"):
         try:
             with open(file, "r") as f:
                 api_key = f.read().strip()
@@ -65,6 +76,23 @@ class Utils:
         return knowledge_prompt_template
     
     
+    def get_web_search_prompt_template(self):
+        web_search_prompt_template = PromptTemplate(
+            template=""" 
+            Utiliza la información proporcionada en el contexto de la búsqueda para responder a la siguiente pregunta de manera clara y precisa:
+
+            Contexto: {context}
+
+            Pregunta: {question}
+
+            Respuesta: Asegúrate de que tu respuesta esté bien fundamentada y, si es necesario, incluye ejemplos relevantes o explicaciones adicionales basadas en el contexto proporcionado.
+            """,
+            input_variables=["question", "context"],
+        )
+        
+        return web_search_prompt_template
+    
+    
     #Zero - shot - classifier
     def get_zsc_template(self):
         zero_shot_template = PromptTemplate(
@@ -79,7 +107,9 @@ class Utils:
                 Question: {question}
 
                 Classify the question as "context", "knowledge", or "search".
-                Only return the class
+                Only return the class name
+                If Class name is "search" return also a optimized and contextfull web_query with this format 
+                search*optimized_query
                 """,
         input_variables=["context", "history", "question"]
         )
