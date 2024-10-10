@@ -76,7 +76,7 @@ The current implementation looks like this:
 
 <h2>Demo</h2>
 <a href="https://youtu.be/gAzRZbOLq4o" target="_blank">
-    <img src="https://img.youtube.com/vi/inJnUh2JDb/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
+    <img src="https://img.youtube.com/vi/gAzRZbOLq4o/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
 </a>
 <p> </p>
 <p>    The test file contains notes on how Linux works.</p>
