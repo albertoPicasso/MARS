@@ -84,7 +84,7 @@ The current implementation looks like this:
     <img src="https://img.youtube.com/vi/gAzRZbOLq4o/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
 </a>
 <p> </p>
-<p>    The test file contains notes on how Linux works.</p>
+<p>    The test file contains this official spanish government document https://www.boe.es/boe/dias/2024/10/10/pdfs/BOE-A-2024-20588.pdf.</p>
 
 <h2>Known issues</h2>
 <ul>
