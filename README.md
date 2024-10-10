@@ -25,9 +25,14 @@
 <p>It is responsible for creating databases as well as monitoring their status. It handles direct interaction with them, including creating, deleting, and retrieving context from the databases. The agent is designed for a <b> multi user</b>.</p>
 <p> </p>
 <p> Chroma as Vector database</p>
+<p></p>
+<p> Embedding Model: paraphrase-multilingual-mpnet-base-v2</p>
+
 
 <h3>Generation Agent</h3>
-<p>It is responsible for interacting with the language model to generate responses. It classifies input text in three different classes an generate a response based on class. Within this agent, two types of agents are combined: conventional multi-agent system agents and language agents from LangChain. This system integrates both the text generation system utilizing LangChain and the web information retrieval system.The agent is designed for a <b> multi user</b>.</p></p>
+<p>It is responsible for interacting with the language model to generate responses. It classifies input text in three different classes an generate a response based on class. Within this agent, two types of agents are combined: conventional multi-agent system agents and language agents from LangChain. This system integrates both the text generation system utilizing LangChain and the web information retrieval system.The agent is designed for a <b> multi user</b>
+<p></p>
+<p> Generation Model: GPT 4o mini </p>
 <td><img src="images/generationFlow.png" alt="Architecture" width="500"></td>
 
 <h2>How to use MARS? </h2>
