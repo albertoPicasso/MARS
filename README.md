@@ -75,8 +75,8 @@ The current implementation looks like this:
 <p>All messages use the same function found in the <i>cryptoManager.py</i> file, but with different keys. Whenever a message is sent to an agent, it is encrypted with the recipient's key, and when a response is expected, it is decrypted using the same key that was used for encryption.</p>
 
 <h2>Demo</h2>
-<a href="https://youtu.be/inJnUh2JDbo" target="_blank">
-    <img src="https://img.youtube.com/vi/inJnUh2JDbo/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
+<a href="https://youtu.be/gAzRZbOLq4o" target="_blank">
+    <img src="https://img.youtube.com/vi/inJnUh2JDb/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
 </a>
 <p> </p>
 <p>    The test file contains notes on how Linux works.</p>
