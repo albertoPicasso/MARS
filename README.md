@@ -25,9 +25,14 @@
 <p>It is responsible for creating databases as well as monitoring their status. It handles direct interaction with them, including creating, deleting, and retrieving context from the databases. The agent is designed for a <b> multi user</b>.</p>
 <p> </p>
 <p> Chroma as Vector database</p>
+<p></p>
+<p> Embedding Model: paraphrase-multilingual-mpnet-base-v2</p>
+
 
 <h3>Generation Agent</h3>
-<p>It is responsible for interacting with the language model to generate responses. It classifies input text in three different classes an generate a response based on class. Within this agent, two types of agents are combined: conventional multi-agent system agents and language agents from LangChain. This system integrates both the text generation system utilizing LangChain and the web information retrieval system.The agent is designed for a <b> multi user</b>.</p></p>
+<p>It is responsible for interacting with the language model to generate responses. It classifies input text in three different classes an generate a response based on class. Within this agent, two types of agents are combined: conventional multi-agent system agents and language agents from LangChain. This system integrates both the text generation system utilizing LangChain and the web information retrieval system.The agent is designed for a <b> multi user</b>
+<p></p>
+<p> Generation Model: GPT 4o mini </p>
 <td><img src="images/generationFlow.png" alt="Architecture" width="500"></td>
 
 <h2>How to use MARS? </h2>
@@ -75,11 +80,11 @@ The current implementation looks like this:
 <p>All messages use the same function found in the <i>cryptoManager.py</i> file, but with different keys. Whenever a message is sent to an agent, it is encrypted with the recipient's key, and when a response is expected, it is decrypted using the same key that was used for encryption.</p>
 
 <h2>Demo</h2>
-<a href="https://youtu.be/inJnUh2JDbo" target="_blank">
-    <img src="https://img.youtube.com/vi/inJnUh2JDbo/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
+<a href="https://youtu.be/gAzRZbOLq4o" target="_blank">
+    <img src="https://img.youtube.com/vi/gAzRZbOLq4o/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
 </a>
 <p> </p>
-<p>    The test file contains notes on how Linux works.</p>
+<p>    The test file contains this official spanish government document https://www.boe.es/boe/dias/2024/10/10/pdfs/BOE-A-2024-20588.pdf.</p>
 
 <h2>Known issues</h2>
 <ul>

@@ -67,8 +67,8 @@
 <p>Todos los mensajes utilizan la misma función que se encuentra en el archivo <i>cryptoManager.py</i>, pero con diferentes claves. Cada vez que se envía un mensaje a un agente, se cifra con la clave del destinatario, y cuando se espera una respuesta, se descifra usando la misma clave que se utilizó para el cifrado.</p>
 
 <h2>Demo</h2>
-<a href="https://youtu.be/inJnUh2JDbo" target="_blank">
-    <img src="https://img.youtube.com/vi/inJnUh2JDbo/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
+<a href="https://youtu.be/gAzRZbOLq4o" target="_blank">
+    <img src="https://img.youtube.com/vi/gAzRZbOLq4o/0.jpg" alt="Mira mi video" style="max-width: 100%; height: auto;">
 </a>
 <p> </p>
 <p>El archivo de prueba contiene notas sobre cómo funciona Linux.</p>
