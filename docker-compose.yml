@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  viewAgent:
+    image: python:3.10-slim  # Imagen base ligera de Python
+    container_name: viewAgent
+    working_dir: /app
+    volumes:
+      - ./viewAgent:/app  # Monta la carpeta local viewAgent al directorio /app del contenedor
+    ports:
+      - "5005:5005"  # Mapea el puerto 5005 del host al contenedor
+    networks:
+      - MARS_Network
+    command: >
+      sh -c "pip install -r requirements.txt && flask run --host=0.0.0.0 --port=5005"
+
+  controlAgent:
+    image: python:3.10-slim
+    container_name: controlAgent
+    working_dir: /app
+    volumes:
+      - ./controlAgent:/app
+    networks:
+      - MARS_Network
+    command: >
+      sh -c "pip install -r requirements.txt && flask run --host=0.0.0.0 --port=5006"
+
+  RADAgent:
+    image: python:3.10-slim
+    container_name: RADAgent
+    working_dir: /app
+    volumes:
+      - ./RADAgent:/app
+    networks:
+      - MARS_Network
+    command: >
+      sh -c "pip install -r requirements.txt && flask run --host=0.0.0.0 --port=5007"
+
+  generationAgent:
+    image: python:3.10-slim
+    container_name: generationAgent
+    working_dir: /app
+    volumes:
+      - ./generationAgent:/app
+    networks:
+      - MARS_Network
+    command: >
+      sh -c "pip install -r requirements.txt && flask run --host=0.0.0.0 --port=5008"
+
+networks:
+  MARS_Network:
+    driver: bridge
