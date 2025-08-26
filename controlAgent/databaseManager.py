@@ -9,7 +9,7 @@ class DatabaseManager:
         Initializes the class by setting up the database file, connecting to the database, 
         creating tables if they do not exist, and displaying the current state of the database.
         """
-        self.DB_file = "controlAgent/users.db"
+        self.DB_file = "users.db"
         self.db = SqliteDatabase(self.DB_file)
         self.initialize_database()
         #self.show_database()

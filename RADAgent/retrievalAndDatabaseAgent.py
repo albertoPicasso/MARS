@@ -103,7 +103,8 @@ class RetrievalAndDatabaseAgent:
             files = data ["files"]
             
             folder_name = str(uuid.uuid4())
-            folder_path = os.path.join("RADAgent",".temp",folder_name)
+            #"RADAgent",
+            folder_path = os.path.join(".temp",folder_name)
             os.makedirs(folder_path)
             
             self.utils.save_pdfs(container=folder_path, files=files)

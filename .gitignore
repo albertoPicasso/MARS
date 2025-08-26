@@ -9,3 +9,4 @@ RADAgent/.temp
 generationAgent/__pycache__
 generationAgent/configFiles/openAIAPI.txt
 generationAgent/configFiles/tavilyAPI.txt
+*/__pycache__*

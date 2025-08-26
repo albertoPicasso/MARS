@@ -14,7 +14,8 @@ import os
 class DatabasesManager:
 
     def __init__(self): 
-        self.route = os.path.join(os.getcwd(), "RADAgent" ,"databases")
+        #"RADAgent" ,
+        self.route = os.path.join(os.getcwd(), "databases")
         self.embedding_model = HuggingFaceEmbeddings(model_name="paraphrase-multilingual-mpnet-base-v2")
         self.status_database = StatusDatabaseManager()
         """

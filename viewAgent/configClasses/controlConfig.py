@@ -7,7 +7,8 @@ class ControlConfig:
     cypherPass: str = field(default="")
     
     def __post_init__(self):
-        file_path = os.path.join('viewAgent','configFiles', 'controlInfo.txt')
+        #'viewAgent',
+        file_path = os.path.join('configFiles', 'controlInfo.txt')
         config = dict()
         with open(file_path, 'r') as file:
             for line in file:

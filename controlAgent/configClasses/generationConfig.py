@@ -7,7 +7,8 @@ class GenerationConfig:
     cypherPass: str = field(default="")
     
     def __post_init__(self):
-        file_path = os.path.join('controlAgent','configFiles', 'generationInfo.txt')
+        # 'controlAgent',
+        file_path = os.path.join('configFiles', 'generationInfo.txt')
         config = dict()
         with open(file_path, 'r') as file:
             for line in file:
