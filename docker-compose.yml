@@ -32,7 +32,7 @@ services:
     networks:
       - MARS_Network
     command: >
-      sh -c "pip install -r requirements.txt && python RADAgent.py"
+      sh -c "pip install -r requirements.txt && python retrievalAndDatabaseAgent.py"
 
   generationAgent:
     image: python:3.10-slim
